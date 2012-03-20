@@ -1,0 +1,4 @@
+                       Configurator.java Change Log
+                       ----------------------------
+
+Opravy:
