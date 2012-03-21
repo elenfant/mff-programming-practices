@@ -207,13 +207,13 @@ public class Configurator {
                             configureFldPty (nm, t, v1, f);
                         }
                         else if(pt.required ())
-                            throw new ConfExc ("Required property '%s' is not configured", nm);
+                            throw new ConfigurationException ("Required property '%s' is not configured", nm);
                     }
                 }
 
             }
 
-        } catch (ConfExc ce) {
+        } catch (ConfigurationException ce) {
             // propagate without wrapping
             throw ce;
 
@@ -229,12 +229,12 @@ public class Configurator {
 
     /**
      * Private interface encapsulating a method for setting a property value on
-     * an object. Instances of the {@link PtySetter} interface are bound to
+     * an object. Instances of the {@link PropertySetter} interface are bound to
      * a particular target object and property name at construction time -- only
      * the value remains unbound and can be set.
      */
-    private interface PtySetter {
-        void setVal (String v);
+    private interface PropertySetter {
+        void setValue (String value);
     }
 
 
@@ -308,7 +308,7 @@ public class Configurator {
      * @param f
      *      the field to set to the given value
      *
-     * @throws ConfExc
+     * @throws ConfigurationException
      *      if the string representation of the value could not be
      *      converted to an instance of the field type or if setting
      *      the field failed
@@ -320,7 +320,7 @@ public class Configurator {
         //
         Object val = mkValInst (f, v);
         if(val==null) {
-            throw new ConfExc ("property %s: could not create %s instance for %s",nm,f.getType().getName(),v);
+            throw new ConfigurationException ("property %s: could not create %s instance for %s",nm,f.getType().getName(),v);
         }
 
         try {
@@ -429,7 +429,7 @@ public class Configurator {
                 boolean oa;
                 trace ("setting method property %s to %s", n, v);
                 if ((Class<?>)dm.getReturnType() != void.class||dm.getParameterTypes()[0] != String.class||dm.getParameterTypes().length != 1)
-                  throw new ConfExc ("property %s: method %s() is not a setter", n, dm.getName ());
+                  throw new ConfigurationException ("property %s: method %s() is not a setter", n, dm.getName ());
                   try {
                     oa = dm.isAccessible ();
                     dm.setAccessible (true);
@@ -455,36 +455,36 @@ public class Configurator {
      * Logging
      * ***********************************************************************/
 
-    private static void trace(String f,Object...a) {
-        if(log.isLoggable(Level.FINE)) log.log(Level.FINE,f,a);
+    private static void trace(String format,Object...args) {
+        if(log.isLoggable(Level.FINE)) { log.log(Level.FINE,format,args); }
     }
 
 
     /* ***********************************************************************
-     * ConfExc
+     * ConfigurationException
      * ***********************************************************************/
 
     /**
      * Common exception for all configuration errors.
      */
-    public static class ConfExc extends RuntimeException {
-        ConfExc( String f, Object ... a ) { super (String.format ( f, a )); }
-        ConfExc ( Throwable t, String f, Object ... a ) { super(String.format ( f, a ), t); }
+    public static class ConfigurationException extends RuntimeException {
+        ConfigurationException ( String format, Object ... args ) { super (String.format ( format, args )); }
+        ConfigurationException ( Throwable throwable, String format, Object ... args ) { super(String.format ( format, args ), throwable); }
     }
 
 
     /**
-     * Wraps the given {@link Throwable} as a {@link ConfExc}
+     * Wraps the given {@link Throwable} as a {@link ConfigurationException}
      * along with an additional formatted message.
      */
-    private static void wrap( Throwable t, String f, Object ... args ) {
-        throw new ConfExc(t,f,args);
+    private static void wrap( Throwable throwable, String format, Object ... args ) {
+        throw new ConfigurationException(throwable,format,args);
     }
 
 
 
     /* ***********************************************************************
-     * AllDeclFieldsIterable
+     * AllDeclaredFieldsIterable
      * ***********************************************************************/
 
     /**
@@ -494,22 +494,22 @@ public class Configurator {
      * the classes along the inheritance path. The iterator (obviously) does not
      * support element removal, since it operates on an immutable structure.
      */
-    static class AllDeclFieldsIterable implements Iterable<Field> {
+    static class AllDeclaredFieldsIterable implements Iterable<Field> {
         private Class <?> leaf;
 
         /**
          * Creates an iterable for the given leaf class. If the leaf class
          * is {@code null}, the iterable produces an empty iterator.
          */
-        AllDeclFieldsIterable (Class<?> lc) { leaf = lc; }
+        AllDeclaredFieldsIterable (Class<?> leafClass) { leaf = leafClass; }
 
         @Override
         public Iterator<Field> iterator () {
             return new Iterator <Field>() {
             	
-            private Class<?> kl = leaf;
+            private Class<?> klass = leaf;
 
-            private Iterator <Field> flds=new ArrIter<>(new Field [0]);
+            private Iterator <Field> fields=new ArrayIterator<>(new Field [0]);
 
             public boolean hasNext () {
               //
@@ -517,14 +517,14 @@ public class Configurator {
               // where to look for fields. If we run out of classes, there
               // are no more fields left.
               //
-              while(! flds.hasNext ()) {
-            	  if (kl == null) {
+              while(! fields.hasNext ()) {
+            	  if (klass == null) {
             		  return false;
             	  }
             	  
-            	  flds = new ArrIter <Field> (kl.getDeclaredFields ());
+            	  fields = new ArrayIterator <Field> (klass.getDeclaredFields ());
             	  
-            	  kl = kl.getSuperclass();
+            	  klass = klass.getSuperclass();
               }
 
               return true;
@@ -534,7 +534,7 @@ public class Configurator {
             public Field next () {
                 if (!hasNext ())
                     throw new NoSuchElementException ();
-                return flds.next ();
+                return fields.next ();
             }
 
             public void remove () {
@@ -546,16 +546,18 @@ public class Configurator {
 
 
     /* *******************************************************************
-     * ArrIter
+     * ArrayIterator
      * *******************************************************************/
 
-    static class ArrIter <E> implements Iterator <E> {
-        private E [] arr;
-        private int len;
-        private int pos;
+    static class ArrayIterator <E> implements Iterator <E> {
+        private E [] array;
+        private int length;
+        private int position;
 
-        ArrIter (E [] a) {
-            arr = a; len = a.length; pos = 0;
+        ArrayIterator (E [] array) {
+            this.array = array; 
+            length = a.length; 
+            position = 0;
         }
 
         @Override
@@ -563,13 +565,13 @@ public class Configurator {
             throw new UnsupportedOperationException ("cannot remove elements from array");
         }
 
-        public boolean hasNext () { return pos < len; }
+        public boolean hasNext () { return position < length; }
 
         @Override
         public E next () {
             if (!hasNext ())
                 throw new NoSuchElementException ();
-            return arr [pos++];
+            return array [position++];
         }
     }
 
