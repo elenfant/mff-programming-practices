@@ -2,3 +2,27 @@
                        ----------------------------
 
 Opravy:
+
+PropertySetter
+- přejmenování - odstranění zkratky
+- odstranění zkratky z názvu metody a parametru
+
+Logging(trace)
+- přidání {} kolem příkazu v if
+- přejmenování: f -> format
+                a -> args
+
+ConfigurationException
+- odstranění zkratek z názvu
+- přejmenování: f -> format
+                a -> args
+                t -> throwable
+
+AllDeclaredFieldsIterable
+- změna názvu
+- přejmenování: lc -> leafClass
+                kl -> klass
+
+ArrayIterator
+- změna názvu
+- změna názvu proměnných - odstranění zkratek
