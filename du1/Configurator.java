@@ -138,7 +138,7 @@ public class Configurator {
         // field based setter, assuming the property is simple enough to
         // convert to object instance. If that also fails, log a warning.
         //
-        PtySetter str = mkMethodSetter (t, n);
+        PropertySetter str = mkMethodSetter (t, n);
         if (str == null)
         {
             str = makeFldPtySetter (n, t);
@@ -152,7 +152,7 @@ public class Configurator {
         //
         // Set the property value.
         //
-        str.setVal (v);
+        str.setValue (v);
     }
 
 
@@ -174,7 +174,7 @@ public class Configurator {
         //
 
         try {
-            for (Field f : new AllDeclFieldsIterable (t.getClass ())) {
+            for (Field f : new AllDeclaredFieldsIterable (t.getClass ())) {
                 //
                 // Skip fields without the @Property annotation or fields
                 // with non-null value.
@@ -258,7 +258,7 @@ public class Configurator {
      *      the given object, or {@code null} if the target object has no field
      *      with matching annotation
      */
-    static PtySetter makeFldPtySetter (final String nm, final Object trg) {
+    static PropertySetter makeFldPtySetter (final String nm, final Object trg) {
         //
         // Find a configurable field for the given property and create a
         // PropertySetter for the property.
@@ -267,7 +267,7 @@ public class Configurator {
         // hierarchy and find the first field annotated with the
         // @Property annotation matching the given property field.
         //
-        for (final Field fld : new AllDeclFieldsIterable (trg.getClass ())) {
+        for (final Field fld : new AllDeclaredFieldsIterable (trg.getClass ())) {
             String cpn;
 
             Property pty = fld.getAnnotation (Property.class);
@@ -278,8 +278,8 @@ public class Configurator {
                 //
                 // Match found -- create the setter.
                 //
-                return new PtySetter() {
-                public void setVal(String val) throws ConfExc {
+                return new PropertySetter() {
+                public void setValue(String val) throws ConfigurationException {
                   trace("setting field property %s to %s",nm,val);
                   configureFldPty (nm, trg, val, fld);
                 }
@@ -390,7 +390,7 @@ public class Configurator {
      *      the given object, or {@code null} if the target object has no setter
      *      method with matching annotation
      */
-    static PtySetter mkMethodSetter (final Object trg, final String n) {
+    static PropertySetter mkMethodSetter (final Object trg, final String n) {
       Class <?> tc;
 
       //
@@ -424,8 +424,8 @@ public class Configurator {
               //
               // Match found -- create the setter.
               //
-              return new PtySetter() {
-              public void setVal( String v ) {
+              return new PropertySetter() {
+              public void setValue( String v ) {
                 boolean oa;
                 trace ("setting method property %s to %s", n, v);
                 if ((Class<?>)dm.getReturnType() != void.class||dm.getParameterTypes()[0] != String.class||dm.getParameterTypes().length != 1)
@@ -556,7 +556,7 @@ public class Configurator {
 
         ArrayIterator (E [] array) {
             this.array = array; 
-            length = a.length; 
+            length = array.length; 
             position = 0;
         }
 
