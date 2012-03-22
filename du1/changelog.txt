@@ -36,3 +36,6 @@ Formátování
 Configurator.set()
 - přejmenování parametrů a lokálních proměnných
 - vyjmutí vnořeného if
+
+Všude
+- odstranění zkratek z názvů tříd, funkcí a jejich parametrů
