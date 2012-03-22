@@ -30,3 +30,5 @@ ArrayIterator
 Formátování
 - obalení každého bloku {}, konzistentní používání { na stejném řádku jako řídící struktura
 - konzistentní použití mezer kolem operátorů, čárek
+- odsazení kódu pouze pomocí tabů
+- odstranění whitespace na koncích řádků
