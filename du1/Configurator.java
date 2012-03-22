@@ -19,14 +19,14 @@ import java.util.logging.Logger;
  * <p>
  * A configurable object is an object that exposes configurable properties. A
  * configurable property is a simple field annotated with the {@link Property}
- * annotation. The values of the properties (i.e. fields) are set using
+ * annotation. The values of the properties(i.e. fields) are set using
  * introspection. There are two ways to configure the value of a configurable
  * field:
  * <p>
  * <ol>
  * <li>If the field type is class that provides either a string constructor
- * (i.e. a constructor with a single {@code String} parameter) or a static
- * factory method {@code valueOf (String)} returning an instance of the class,
+ *(i.e. a constructor with a single {@code String} parameter) or a static
+ * factory method {@code valueOf(String)} returning an instance of the class,
  * then the value of the field is set to an instance of the field type created
  * from a string representation of the value.</li>
  * <li>If creating instances of the field type is more complex, the field value
@@ -43,7 +43,7 @@ import java.util.logging.Logger;
  */
 public class Configurator {
 
-    public static Logger log=Logger.getAnonymousLogger();
+    public static Logger log = Logger.getAnonymousLogger();
 
 
     /* ***********************************************************************
@@ -51,8 +51,8 @@ public class Configurator {
      * ***********************************************************************/
 
     @Documented
-    @Retention (RetentionPolicy.RUNTIME)
-    @Target (ElementType.FIELD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.FIELD)
     public @interface Property {
 
         /**
@@ -96,8 +96,8 @@ public class Configurator {
 
 
     @Documented
-    @Retention (RetentionPolicy.RUNTIME)
-    @Target (ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
     public @interface Setter {
 
         /**
@@ -108,7 +108,7 @@ public class Configurator {
          *      empty string indicating that the name corresponds to method
          *      name without the "set" prefix with the first letter in lower case
          */
-        String name () default "";
+        String name() default "";
 
     }
 
@@ -131,20 +131,20 @@ public class Configurator {
      *      if the value of the given property cannot be set on the
      *      given object
      */
-    public static void set (Object t, String n, String v) {
+    public static void set(Object t, String n, String v) {
         //
         // First try to obtain a method based setter, which is necessary
         // for more complex properties. If that fails, try to obtain a
         // field based setter, assuming the property is simple enough to
         // convert to object instance. If that also fails, log a warning.
         //
-        PropertySetter str = mkMethodSetter (t, n);
-        if (str == null)
-        {
-            str = makeFldPtySetter (n, t);
+        PropertySetter str = mkMethodSetter(t, n);
+        if (str == null) {
+            str = makeFldPtySetter(n, t);
             if (str == null) {
-                if (log.isLoggable (Level.WARNING))
-                    log.log (Level.WARNING, "Unable to find configuration method for property %s", n );
+                if (log.isLoggable(Level.WARNING)) {
+                    log.log(Level.WARNING, "Unable to find configuration method for property %s", n );
+                }
                 return;
             }
         }
@@ -152,7 +152,7 @@ public class Configurator {
         //
         // Set the property value.
         //
-        str.setValue (v);
+        str.setValue(v);
     }
 
 
@@ -162,7 +162,7 @@ public class Configurator {
      * @param obj
      *      object with configurable fields
      */
-    public static void check (Object t) {
+    public static void check(Object t) {
         //
         // Find all configurable fields and make sure that all mandatory
         // fields have a non-null value. If any configurable field with
@@ -174,14 +174,13 @@ public class Configurator {
         //
 
         try {
-            for (Field f : new AllDeclaredFieldsIterable (t.getClass ())) {
+            for (Field f : new AllDeclaredFieldsIterable(t.getClass())) {
                 //
                 // Skip fields without the @Property annotation or fields
                 // with non-null value.
                 //
-                Property pt = f.getAnnotation (Property.class);
-                if (pt != null)
-                {
+                Property pt = f.getAnnotation(Property.class);
+                if (pt != null) {
                     boolean oa;
                     Object v;
 
@@ -189,36 +188,34 @@ public class Configurator {
                     // Make the field accessible before getting its value and
                     // restore the previous accessibility state after that.
                     //
-                    oa = f.isAccessible ();
-                    f.setAccessible (true);
-                    v = f.get (t);
-                    f.setAccessible (oa);
+                    oa = f.isAccessible();
+                    f.setAccessible(true);
+                    v = f.get(t);
+                    f.setAccessible(oa);
 
                     //
                     // Set default value for null fields.
                     //
-                    if (v == null)
-                    {
-                        String nm = ((pt.name ().length () > 0) ? pt.name () : f.getName ());
-                        String v1 = ((pt.defaultValue ().length () > 0) ? pt.defaultValue () : null);
-                        if (v1 != null)
-                        {
-                            trace ("setting field property %s to default value %s", nm, v1);
-                            configureFldPty (nm, t, v1, f);
+                    if (v == null) {
+                        String nm =((pt.name().length() > 0) ? pt.name() : f.getName());
+                        String v1 =((pt.defaultValue().length() > 0) ? pt.defaultValue() : null);
+                        if (v1 != null) {
+                            trace("setting field property %s to default value %s", nm, v1);
+                            configureFldPty(nm, t, v1, f);
                         }
-                        else if(pt.required ())
-                            throw new ConfigurationException ("Required property '%s' is not configured", nm);
+                        else if (pt.required()) {
+                            throw new ConfigurationException("Required property '%s' is not configured", nm);
+                        }
                     }
                 }
-
             }
 
-        } catch (ConfigurationException ce) {
+        } catch(ConfigurationException ce) {
             // propagate without wrapping
             throw ce;
 
-        } catch (Exception e) {
-            wrap (e, "Unable to verify object property configuration!");
+        } catch(Exception e) {
+            wrap(e, "Unable to verify object property configuration!");
         }
     }
 
@@ -234,7 +231,7 @@ public class Configurator {
      * the value remains unbound and can be set.
      */
     private interface PropertySetter {
-        void setValue (String value);
+        void setValue(String value);
     }
 
 
@@ -258,7 +255,7 @@ public class Configurator {
      *      the given object, or {@code null} if the target object has no field
      *      with matching annotation
      */
-    static PropertySetter makeFldPtySetter (final String nm, final Object trg) {
+    static PropertySetter makeFldPtySetter(final String nm, final Object trg) {
         //
         // Find a configurable field for the given property and create a
         // PropertySetter for the property.
@@ -267,22 +264,26 @@ public class Configurator {
         // hierarchy and find the first field annotated with the
         // @Property annotation matching the given property field.
         //
-        for (final Field fld : new AllDeclaredFieldsIterable (trg.getClass ())) {
+        for (final Field fld : new AllDeclaredFieldsIterable(trg.getClass())) {
             String cpn;
 
-            Property pty = fld.getAnnotation (Property.class);
-            if (pty == null) cpn = null;
-            else cpn = (pty.name ().length () > 0) ? pty.name () : fld.getName ();
+            Property pty = fld.getAnnotation(Property.class);
+            if (pty == null) {
+            	cpn = null;
+            }
+            else {
+            	cpn = (pty.name().length() > 0) ? pty.name() : fld.getName();
+            }
 
-            if (nm.equals (cpn)) {
+            if (nm.equals(cpn)) {
                 //
                 // Match found -- create the setter.
                 //
                 return new PropertySetter() {
-                public void setValue(String val) throws ConfigurationException {
-                  trace("setting field property %s to %s",nm,val);
-                  configureFldPty (nm, trg, val, fld);
-                }
+	                public void setValue(String val) throws ConfigurationException {
+						trace("setting field property %s to %s", nm, val);
+						configureFldPty(nm, trg, val, fld);
+	                }
                 };
             }
         }
@@ -313,28 +314,28 @@ public class Configurator {
      *      converted to an instance of the field type or if setting
      *      the field failed
      */
-    static void configureFldPty (String nm, Object trg, String v, Field f) {
+    static void configureFldPty(String nm, Object trg, String v, Field f) {
         //
         // Create an instance of the property value and set the field
         // value on the target object.
         //
-        Object val = mkValInst (f, v);
-        if(val==null) {
-            throw new ConfigurationException ("property %s: could not create %s instance for %s",nm,f.getType().getName(),v);
+        Object val = mkValInst(f, v);
+        if (val == null) {
+            throw new ConfigurationException("property %s: could not create %s instance for %s", nm, f.getType().getName(), v);
         }
 
         try {
-            boolean oa = f.isAccessible ();
+            boolean oa = f.isAccessible();
 
             //
             // Make the field accessible before setting its value and
             // restore the previous accessibility state after that.
             //
-            f.setAccessible (true);
-            f.set (trg, val);
-            f.setAccessible (oa);
-        } catch (Exception e) {
-            wrap (e, "Unable to configure field %s with property %s=%s", f.getName (), nm, v);
+            f.setAccessible(true);
+            f.set(trg, val);
+            f.setAccessible(oa);
+        } catch(Exception e) {
+            wrap(e, "Unable to configure field %s with property %s=%s", f.getName(), nm, v);
         }
     }
 
@@ -353,18 +354,19 @@ public class Configurator {
      *      an object of the given field type representing the given value, or
      *      {@code null} if the instance could not be created
      */
-    static Object mkValInst (Field fld, String s) {
+    static Object mkValInst(Field fld, String s) {
         // First try to create the value instance by invoking a string constructor of the field class.
         try {
-            return ((Constructor <?>) ((Class <?>) fld.getType ()).getConstructor (new Class <?> [] { String.class })).newInstance (s);
-        } catch (Exception e) { /* quell the exception and try the next method */ }
+            return((Constructor<?>)((Class<?>) fld.getType()).getConstructor(new Class<?>[] { String.class })).newInstance(s);
+        } catch(Exception e) { /* quell the exception and try the next method */ }
 
         // If there is no suitable constructor, try to create the instance by invoking a static factory method.
         try {
-            Method fact = ((Class <?>) fld.getType ()).getMethod ("valueOf", new Class <?> [] { String.class });
-            if (((Class<?>)fld.getType()).isAssignableFrom(fact.getReturnType()))
-                return fact.invoke (null, s);
-        } catch (Exception e) { /* quell the exception */ }
+            Method fact =((Class<?>) fld.getType()).getMethod("valueOf", new Class<?>[] { String.class });
+            if (((Class<?>)fld.getType()).isAssignableFrom(fact.getReturnType())) {
+                return fact.invoke(null, s);
+            }
+        } catch(Exception e) { /* quell the exception */ }
 
         // Could not create the instance, return null.
         return null;
@@ -390,8 +392,8 @@ public class Configurator {
      *      the given object, or {@code null} if the target object has no setter
      *      method with matching annotation
      */
-    static PropertySetter mkMethodSetter (final Object trg, final String n) {
-      Class <?> tc;
+    static PropertySetter mkMethodSetter(final Object trg, final String n) {
+      Class<?> tc;
 
       //
       // Find a setter method for the given property and create a
@@ -401,48 +403,51 @@ public class Configurator {
       // hierarchy and find the first setter method annotated with the
       // @Setter annotation matching the given property field.
       //
-      tc = trg.getClass ();
+      tc = trg.getClass();
       do {
-        for (final Method dm : tc.getDeclaredMethods ()) {
+        for (final Method dm : tc.getDeclaredMethods()) {
           Setter str;
           String s;
-          str = dm.getAnnotation (Setter.class);
-          if (str == null) s = null;
+          str = dm.getAnnotation(Setter.class);
+          if (str == null) {
+        	  s = null;
+          }
           else {
-            s = str.name ();
-            if (s.length () == 0)
-            {
+            s = str.name();
+            if (s.length() == 0) {
               //
               // If the method name starts with "set", strip the prefix and lower case the first letter of the suffix.
               //
-              s = dm.getName ();
-              if (s.startsWith("set"))
-                s = s.substring ( 3, 4 ).toLowerCase() + s.substring( 4 );
+              s = dm.getName();
+              if (s.startsWith("set")) {
+            	  s = s.substring( 3, 4 ).toLowerCase() + s.substring( 4 );  
               }
             }
-            if (n.equals (s)) {
+          }
+            if (n.equals(s)) {
               //
               // Match found -- create the setter.
               //
               return new PropertySetter() {
               public void setValue( String v ) {
                 boolean oa;
-                trace ("setting method property %s to %s", n, v);
-                if ((Class<?>)dm.getReturnType() != void.class||dm.getParameterTypes()[0] != String.class||dm.getParameterTypes().length != 1)
-                  throw new ConfigurationException ("property %s: method %s() is not a setter", n, dm.getName ());
+                trace("setting method property %s to %s", n, v);
+                if ((Class<?>)dm.getReturnType() != void.class||dm.getParameterTypes()[0] != String.class||dm.getParameterTypes().length != 1) {
+                  throw new ConfigurationException("property %s: method %s() is not a setter", n, dm.getName());
+                }
                   try {
-                    oa = dm.isAccessible ();
-                    dm.setAccessible (true);
-                    dm.invoke (trg, v);
-                    dm.setAccessible (oa);
-                  } catch (Exception e) {
-                    wrap(e,"Unable to set property %s=%s using method %s()",n,v,dm.getName());
+                    oa = dm.isAccessible();
+                    dm.setAccessible(true);
+                    dm.invoke(trg, v);
+                    dm.setAccessible(oa);
+                  } catch(Exception e) {
+                    wrap(e, "Unable to set property %s=%s using method %s()", n, v, dm.getName());
                   }
               }
             };
           }
         }
-        tc = tc.getSuperclass ();
+        tc = tc.getSuperclass();
       } while (tc != null);
       //
       // No match found.
@@ -455,8 +460,10 @@ public class Configurator {
      * Logging
      * ***********************************************************************/
 
-    private static void trace(String format,Object...args) {
-        if(log.isLoggable(Level.FINE)) { log.log(Level.FINE,format,args); }
+    private static void trace(String format, Object ... args) {
+        if (log.isLoggable(Level.FINE)) {
+        	log.log(Level.FINE, format, args);
+        }
     }
 
 
@@ -468,8 +475,12 @@ public class Configurator {
      * Common exception for all configuration errors.
      */
     public static class ConfigurationException extends RuntimeException {
-        ConfigurationException ( String format, Object ... args ) { super (String.format ( format, args )); }
-        ConfigurationException ( Throwable throwable, String format, Object ... args ) { super(String.format ( format, args ), throwable); }
+        ConfigurationException(String format, Object ... args) {
+        	super(String.format(format, args));
+        }
+        ConfigurationException(Throwable throwable, String format, Object ... args) {
+        	super(String.format(format, args), throwable);
+        }
     }
 
 
@@ -477,8 +488,8 @@ public class Configurator {
      * Wraps the given {@link Throwable} as a {@link ConfigurationException}
      * along with an additional formatted message.
      */
-    private static void wrap( Throwable throwable, String format, Object ... args ) {
-        throw new ConfigurationException(throwable,format,args);
+    private static void wrap(Throwable throwable, String format, Object ... args) {
+        throw new ConfigurationException(throwable, format, args);
     }
 
 
@@ -490,55 +501,54 @@ public class Configurator {
     /**
      * Provides an iterable interface to fields declared in a class hierarchy.
      * The provided iterator traverses the inheritance hierarchy from the given
-     * (leaf) class to the (root) base class and returns all fields declared in
-     * the classes along the inheritance path. The iterator (obviously) does not
+     *(leaf) class to the(root) base class and returns all fields declared in
+     * the classes along the inheritance path. The iterator(obviously) does not
      * support element removal, since it operates on an immutable structure.
      */
     static class AllDeclaredFieldsIterable implements Iterable<Field> {
-        private Class <?> leaf;
+        private Class<?> leaf;
 
         /**
          * Creates an iterable for the given leaf class. If the leaf class
          * is {@code null}, the iterable produces an empty iterator.
          */
-        AllDeclaredFieldsIterable (Class<?> leafClass) { leaf = leafClass; }
+        AllDeclaredFieldsIterable(Class<?> leafClass) {
+        	leaf = leafClass;
+        }
 
         @Override
-        public Iterator<Field> iterator () {
-            return new Iterator <Field>() {
+        public Iterator<Field> iterator() {
+            return new Iterator<Field>() {
             	
             private Class<?> klass = leaf;
+            private Iterator<Field> fields = new ArrayIterator<>(new Field[0]);
 
-            private Iterator <Field> fields=new ArrayIterator<>(new Field [0]);
-
-            public boolean hasNext () {
+            public boolean hasNext() {
               //
               // If there are no fields, check if there is another class
               // where to look for fields. If we run out of classes, there
               // are no more fields left.
               //
-              while(! fields.hasNext ()) {
+              while (!fields.hasNext()) {
             	  if (klass == null) {
             		  return false;
-            	  }
-            	  
-            	  fields = new ArrayIterator <Field> (klass.getDeclaredFields ());
-            	  
+            	  }            	  
+            	  fields = new ArrayIterator<Field>(klass.getDeclaredFields());            	  
             	  klass = klass.getSuperclass();
               }
-
               return true;
             }
 
             @Override
-            public Field next () {
-                if (!hasNext ())
-                    throw new NoSuchElementException ();
-                return fields.next ();
+            public Field next() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+                return fields.next();
             }
 
-            public void remove () {
-                throw new UnsupportedOperationException ();
+            public void remove() {
+                throw new UnsupportedOperationException();
             }
         };
         }
@@ -549,29 +559,32 @@ public class Configurator {
      * ArrayIterator
      * *******************************************************************/
 
-    static class ArrayIterator <E> implements Iterator <E> {
-        private E [] array;
+    static class ArrayIterator<E> implements Iterator<E> {
+        private E[] array;
         private int length;
         private int position;
 
-        ArrayIterator (E [] array) {
+        ArrayIterator(E[] array) {
             this.array = array; 
             length = array.length; 
             position = 0;
         }
 
         @Override
-        public void remove () {
-            throw new UnsupportedOperationException ("cannot remove elements from array");
+        public void remove() {
+            throw new UnsupportedOperationException("cannot remove elements from array");
         }
 
-        public boolean hasNext () { return position < length; }
+        public boolean hasNext() {
+        	return position < length;
+        }
 
         @Override
-        public E next () {
-            if (!hasNext ())
-                throw new NoSuchElementException ();
-            return array [position++];
+        public E next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
+            return array[position++];
         }
     }
 

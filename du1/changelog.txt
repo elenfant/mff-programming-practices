@@ -26,3 +26,7 @@ AllDeclaredFieldsIterable
 ArrayIterator
 - změna názvu
 - změna názvu proměnných - odstranění zkratek
+
+Formátování
+- obalení každého bloku {}, konzistentní používání { na stejném řádku jako řídící struktura
+- konzistentní použití mezer kolem operátorů, čárek
