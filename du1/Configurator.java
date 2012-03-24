@@ -155,70 +155,6 @@ public class Configurator {
 		//
 		setter.setValue(propertyValue);
 	}
-
-	/**
-	 * Returns the name of specified Property or it's field name, if property has empty name.
-	 *
-	 * @param property
-	 *	  object with field field
-	 * @param field
-	 *	  field
-	 */	
-	protected static String getPropertyName(Property property, Field field) {
-		assert(property != null && field != null);
-		return ((property.name().length() > 0) ? property.name() : field.getName());
-	}
-	
-	/**
-	 * Returns the value of the given Field on the given object.
-	 *
-	 * @param target
-	 *	  object with field
-	 * @param field
-	 *	  field
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 */	
-	protected static Object getObjectFieldValue(Object target, Field field) throws IllegalArgumentException, IllegalAccessException {
-		if (field == null) {
-			return null;
-			// throw new NullPointerException("Required parametr field is null.");
-		}
-		//
-		// Make the field accessible before getting its value and
-		// restore the previous accessibility state after that.
-		//
-		boolean fieldAccesible = field.isAccessible();
-		field.setAccessible(true);
-		Object fieldValue = field.get(target);
-		field.setAccessible(fieldAccesible);
-		
-		return fieldValue;
-	}
-
-	/**
-	 * Sets the value of the given field on the given object to its default value.
-	 *
-	 * @param target
-	 *	  object with field to set
-	 * @param property
-	 *	  property with its default value
-	 * @param field
-	 *	  field to set
-	 * @throws ConfigurationException 
-	 */	
-	private static void configureFieldPropertyToDefault(Object target, Property property, Field field) throws ConfigurationException {
-		//
-		// Set default value for null fields.
-		//
-		String propertyName = getPropertyName(property, field);
-		String defaultValue = property.defaultValue();
-		if (defaultValue == "" && property.isRequired()) {
-			throw new ConfigurationException("Required property '%s' is not configured", propertyName);
-		}
-		trace("setting field property %s to default value %s", propertyName, defaultValue);
-		configureFieldProperty(propertyName, target, defaultValue, field);
-	}
 	
 	/**
 	 * Checks if all configurable fields in the passed object are not null.
@@ -260,7 +196,75 @@ public class Configurator {
 			wrap(exception, "Unable to verify object property configuration!");
 		}
 	}
+	
+	/* ***********************************************************************
+	 * PRIVATE METHODS
+	 * ***********************************************************************/
 
+	/**
+	 * Returns the name of specified Property or it's field name, if property has empty name.
+	 *
+	 * @param property
+	 *	  object with field field
+	 * @param field
+	 *	  field
+	 */	
+	private static String getPropertyName(Property property, Field field) {
+		assert(property != null && field != null);
+		return ((property.name().length() > 0) ? property.name() : field.getName());
+	}
+	
+	/**
+	 * Returns the value of the given Field on the given object.
+	 *
+	 * @param target
+	 *	  object with field
+	 * @param field
+	 *	  field
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 */	
+	private static Object getObjectFieldValue(Object target, Field field) throws IllegalArgumentException, IllegalAccessException {
+		if (field == null) {
+			return null;
+			// throw new NullPointerException("Required parametr field is null.");
+		}
+		//
+		// Make the field accessible before getting its value and
+		// restore the previous accessibility state after that.
+		//
+		boolean fieldAccesible = field.isAccessible();
+		field.setAccessible(true);
+		Object fieldValue = field.get(target);
+		field.setAccessible(fieldAccesible);
+		
+		return fieldValue;
+	}
+
+
+	/**
+	 * Sets the value of the given field on the given object to its default value.
+	 *
+	 * @param target
+	 *	  object with field to set
+	 * @param property
+	 *	  property with its default value
+	 * @param field
+	 *	  field to set
+	 * @throws ConfigurationException 
+	 */	
+	private static void configureFieldPropertyToDefault(Object target, Property property, Field field) throws ConfigurationException {
+		//
+		// Set default value for null fields.
+		//
+		String propertyName = getPropertyName(property, field);
+		String defaultValue = property.defaultValue();
+		if (defaultValue == "" && property.isRequired()) {
+			throw new ConfigurationException("Required property '%s' is not configured", propertyName);
+		}
+		trace("setting field property %s to default value %s", propertyName, defaultValue);
+		configureFieldProperty(propertyName, target, defaultValue, field);
+	}
 
 	/* ***********************************************************************
 	 * PropertySetter
@@ -352,7 +356,7 @@ public class Configurator {
 	 *	  converted to an instance of the field type or if setting
 	 *	  the field failed
 	 */
-	static void configureFieldProperty(String propertyName, Object target, String propertyValue, Field field) {
+	static void configureFieldProperty(String propertyName, Object target, String propertyValue, Field field) throws ConfigurationException {
 		//
 		// Create an instance of the property value and set the field
 		// value on the target object.
