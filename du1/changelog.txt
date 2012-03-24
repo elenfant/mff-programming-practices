@@ -62,7 +62,14 @@ Configurator.makeFieldPropertySetter()
 - inicializace proměnné classPropertyName;
 - obrácení podmínky u (property == null) -> spolu s inicializací ušetří jednu else větev
 
+Configurator.makeValueInstance()
+- nahrazen ten zběsilý return
+- v rámci něho změněno pole (new Class<?>[] { String.class }) na jednu třídu (String.class)
+
 TODO
 - sjednocení pořadí parametrů u funkcí (target, name a naopak)
 - přidat throws ExceptionClass za jednotlivé fce nebo @throws(classOf[Exception]) anotaci?
 - doplnit komentáře k novým funkcím? (včetně javadocu)
+- nemá interface začínat na I?
+- 80 znaků na šířku
+- zrušit všechny Warningy

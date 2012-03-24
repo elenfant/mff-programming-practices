@@ -132,7 +132,8 @@ public class Configurator {
 	 *	  if the value of the given property cannot be set on the
 	 *	  given object
 	 */
-	public static void set(Object target, String propertyName, String propertyValue) {
+	public static void set(Object target, String propertyName, 
+			String propertyValue) {
 		//
 		// First try to obtain a method based setter, which is necessary
 		// for more complex properties. If that fails, try to obtain a
@@ -145,7 +146,8 @@ public class Configurator {
 		}
 		if (setter == null) {
 			if (log.isLoggable(Level.WARNING)) {
-				log.log(Level.WARNING, "Unable to find configuration method for property %s", propertyName);
+				log.log(Level.WARNING, "Unable to find configuration method " +
+						"for property %s", propertyName);
 			}
 			return;
 		}
@@ -175,7 +177,8 @@ public class Configurator {
 		//
 
 		try {
-			for (Field field : new AllDeclaredFieldsIterable(target.getClass())) {
+			for (Field field : new AllDeclaredFieldsIterable(
+					target.getClass())) {
 				//
 				// Skip fields without the @Property annotation or fields
 				// with non-null value.
@@ -192,8 +195,8 @@ public class Configurator {
 		} catch(ConfigurationException configException) {
 			// propagate without wrapping
 			throw configException;
-		} catch(Exception exception) {
-			wrap(exception, "Unable to verify object property configuration!");
+		} catch(Exception anyException) {
+			wrap(anyException, "Unable to verify object property configuration!");
 		}
 	}
 	
@@ -202,7 +205,9 @@ public class Configurator {
 	 * ***********************************************************************/
 
 	/**
-	 * Returns the name of specified Property or it's field name, if property has empty name.
+	 * Returns the name of specified Property.
+	 * If it has empty name, return it's field name instead. 
+	 * if property has .
 	 *
 	 * @param property
 	 *	  object with field field
@@ -211,7 +216,14 @@ public class Configurator {
 	 */	
 	private static String getPropertyName(Property property, Field field) {
 		assert(property != null && field != null);
-		return ((property.name().length() > 0) ? property.name() : field.getName());
+
+		if (property.name().length() > 0) {
+			return property.name();
+		}
+		else {
+			return field.getName();
+		}
+
 	}
 	
 	/**
@@ -239,6 +251,34 @@ public class Configurator {
 		field.setAccessible(fieldAccesible);
 		
 		return fieldValue;
+	}
+
+	/**
+	 * Sets the given field of the given object to the given instance of
+	 * the field type.
+	 *
+	 * @param target
+	 *	  target object on which to set the field value
+	 * @param field
+	 *	  the field to set to the given value
+	 * @param valueInstance
+	 *	  value of the property being configured
+	 *
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 */
+	private static void setObjectFieldValue(Object target, Field field, Object valueInstance) throws IllegalArgumentException, IllegalAccessException {
+		// method called internally, so parameters shouldn't be null in this time
+		assert(target != null && field != null && valueInstance != null);
+		assert(field.getType() == valueInstance.getClass());
+		//
+		// Make the field accessible before setting its value and
+		// restore the previous accessibility state after that.
+		//
+		boolean fieldAccessible = field.isAccessible();
+		field.setAccessible(true);
+		field.set(target, valueInstance);
+		field.setAccessible(fieldAccessible);
 	}
 
 
@@ -361,23 +401,15 @@ public class Configurator {
 		// Create an instance of the property value and set the field
 		// value on the target object.
 		//
-		Object val = makeValueInstance(field, propertyValue);
-		if (val == null) {
+		Object valueInstance = makeValueInstance(field, propertyValue);
+		if (valueInstance == null) {
 			throw new ConfigurationException("property %s: could not create %s instance for %s", propertyName, field.getType().getName(), propertyValue);
 		}
 
 		try {
-			boolean oa = field.isAccessible();
-
-			//
-			// Make the field accessible before setting its value and
-			// restore the previous accessibility state after that.
-			//
-			field.setAccessible(true);
-			field.set(target, val);
-			field.setAccessible(oa);
-		} catch(Exception e) {
-			wrap(e, "Unable to configure field %s with property %s=%s", field.getName(), propertyName, propertyValue);
+			setObjectFieldValue(target, field, valueInstance);
+		} catch(Exception anyException) {
+			wrap(anyException, "Unable to configure field %s with property %s=%s", field.getName(), propertyName, propertyValue);
 		}
 	}
 
@@ -399,16 +431,24 @@ public class Configurator {
 	static Object makeValueInstance(Field field, String fieldValue) {
 		// First try to create the value instance by invoking a string constructor of the field class.
 		try {
-			return((Constructor<?>)((Class<?>) field.getType()).getConstructor(new Class<?>[] { String.class })).newInstance(fieldValue);
-		} catch(Exception e) { /* quell the exception and try the next method */ }
+			Class<?> fieldClass = field.getType();
+			Constructor<?> fieldConstructor = fieldClass.getConstructor(String.class); //new Class <?> [] { String.class }
+			return fieldConstructor.newInstance(fieldValue);
+		} catch(Exception anyException) {
+			/* quell the exception and try the next method */
+		}
 
 		// If there is no suitable constructor, try to create the instance by invoking a static factory method.
 		try {
-			Method fact = ((Class<?>) field.getType()).getMethod("valueOf", new Class<?>[] { String.class });
-			if (((Class<?>)field.getType()).isAssignableFrom(fact.getReturnType())) {
-				return fact.invoke(null, fieldValue);
+			Class<?> fieldClass = field.getType();
+			Method factoryMethod = fieldClass.getMethod("valueOf", new Class<?>[] { String.class });
+			Class<?> returnType = factoryMethod.getReturnType();
+			if (fieldClass.isAssignableFrom(returnType)) {
+				return factoryMethod.invoke(null, fieldValue);
 			}
-		} catch(Exception e) { /* quell the exception */ }
+		} catch(Exception anyException) {
+			/* quell the exception */
+		}
 
 		// Could not create the instance, return null.
 		return null;
