@@ -39,3 +39,27 @@ Configurator.set()
 
 Všude
 - odstranění zkratek z názvů tříd, funkcí a jejich parametrů
+
+Configurator.getObjectFieldValue()
+- nová funkce pro získání field hodnoty objektu
+
+Configurator.getPropertyName()
+- nová funkce pro získání jména property, případně jména fieldu, pokud property má prázdné jméno  
+
+Configurator.check()
+- přejmenování lokálních proměnných (ze zkratek)
+- inicializace při deklaraci, deklarace blízko prvního použití
+- použití getObjectFieldValue() a getPropertyName()
+- sjednocení testu před nastavením defaultní hodnoty
+- sjednocení testu na povinnou default hodnotu (zrušení else if () větve)
+- doplnění throws anotace
+
+Configurator.makeFieldPropertySetter()
+- getPropertyName()
+- inicializace proměnné classPropertyName;
+- obrácení podmínky u (property == null) -> spolu s inicializací ušetří jednu else větev
+
+TODO
+- sjednocení pořadí parametrů u funkcí (target, name a naopak)
+- přidat throws ExceptionClass za jednotlivé fce nebo @throws(classOf[Exception]) anotaci?
+- doplnit komentáře k novým funkcím? (včetně javadocu)

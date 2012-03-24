@@ -1,4 +1,5 @@
-package org.ow2.dsrg.jpmf.util;
+//package org.ow2.dsrg.jpmf.util;
+package du1;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -72,7 +73,7 @@ public class Configurator {
 		 *	  {@code true} if the property must have a non-null value,
 		 *	  {@code false} otherwise
 		 */
-		boolean required() default true;
+		boolean isRequired() default true;
 
 		/**
 		 * Returns the string representation of the default value of the
@@ -127,7 +128,7 @@ public class Configurator {
 	 *	  property name
 	 * @param propertyValue
 	 *	  property value
-	 * @throws ConfExc
+	 * @throws ConfigurationException
 	 *	  if the value of the given property cannot be set on the
 	 *	  given object
 	 */
@@ -144,7 +145,7 @@ public class Configurator {
 		}
 		if (setter == null) {
 			if (log.isLoggable(Level.WARNING)) {
-				log.log(Level.WARNING, "Unable to find configuration method for property %s", propertyName );
+				log.log(Level.WARNING, "Unable to find configuration method for property %s", propertyName);
 			}
 			return;
 		}
@@ -155,14 +156,54 @@ public class Configurator {
 		setter.setValue(propertyValue);
 	}
 
-
+	/**
+	 * Returns the name of specified Property or it's field name, if property has empty name.
+	 *
+	 * @param property
+	 *	  object with field field
+	 * @param field
+	 *	  field
+	 */	
+	protected static String getPropertyName(Property property, Field field) {
+		assert(property != null && field != null);
+		return ((property.name().length() > 0) ? property.name() : field.getName());
+	}
+	
+	/**
+	 * Returns the value of the specified Field on the specified object.
+	 *
+	 * @param target
+	 *	  object with field
+	 * @param field
+	 *	  field
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 */	
+	protected static Object getObjectFieldValue(Object target, Field field) throws IllegalArgumentException, IllegalAccessException {
+		if (field == null) {
+			return null;
+			// throw new NullPointerException("Required parametr field is null.");
+		}
+		//
+		// Make the field accessible before getting its value and
+		// restore the previous accessibility state after that.
+		//
+		boolean fieldAccesible = field.isAccessible();
+		field.setAccessible(true);
+		Object fieldValue = field.get(target);
+		field.setAccessible(fieldAccesible);
+		
+		return fieldValue;
+	}
+	
 	/**
 	 * Checks if all configurable fields in the passed object are not null.
 	 *
 	 * @param target
 	 *	  object with configurable fields
+	 * @throws ConfigurationException
 	 */
-	public static void check(Object target) {
+	public static void check(Object target) throws ConfigurationException {
 		//
 		// Find all configurable fields and make sure that all mandatory
 		// fields have a non-null value. If any configurable field with
@@ -174,48 +215,34 @@ public class Configurator {
 		//
 
 		try {
-			for (Field f : new AllDeclaredFieldsIterable(target.getClass())) {
+			for (Field field : new AllDeclaredFieldsIterable(target.getClass())) {
 				//
 				// Skip fields without the @Property annotation or fields
 				// with non-null value.
 				//
-				Property pt = f.getAnnotation(Property.class);
-				if (pt != null) {
-					boolean oa;
-					Object v;
-
-					//
-					// Make the field accessible before getting its value and
-					// restore the previous accessibility state after that.
-					//
-					oa = f.isAccessible();
-					f.setAccessible(true);
-					v = f.get(target);
-					f.setAccessible(oa);
-
-					//
-					// Set default value for null fields.
-					//
-					if (v == null) {
-						String nm =((pt.name().length() > 0) ? pt.name() : f.getName());
-						String v1 =((pt.defaultValue().length() > 0) ? pt.defaultValue() : null);
-						if (v1 != null) {
-							trace("setting field property %s to default value %s", nm, v1);
-							configureFieldProperty(nm, target, v1, f);
-						}
-						else if (pt.required()) {
-							throw new ConfigurationException("Required property '%s' is not configured", nm);
-						}
-					}
+				Property property = field.getAnnotation(Property.class);
+				Object propertyValue = getObjectFieldValue(target, field);
+				if (property == null || propertyValue != null) {
+					continue;
 				}
+
+				//
+				// Set default value for null fields.
+				//
+				String propertyName = getPropertyName(property, field);
+				String defaultValue = property.defaultValue();
+				if (defaultValue == "" && property.isRequired()) {
+					throw new ConfigurationException("Required property '%s' is not configured", propertyName);
+				}
+				trace("setting field property %s to default value %s", propertyName, defaultValue);
+				configureFieldProperty(propertyName, target, defaultValue, field);
 			}
 
-		} catch(ConfigurationException ce) {
+		} catch(ConfigurationException configException) {
 			// propagate without wrapping
-			throw ce;
-
-		} catch(Exception e) {
-			wrap(e, "Unable to verify object property configuration!");
+			throw configException;
+		} catch(Exception exception) {
+			wrap(exception, "Unable to verify object property configuration!");
 		}
 	}
 
@@ -240,9 +267,9 @@ public class Configurator {
 	 * ***********************************************************************/
 
 	/**
-	 * Returns a field based {@link PtySetter} bound to the given object
+	 * Returns a field based {@link PropertySetter} bound to the given object
 	 * and property name. When setting the property value, the returned
-	 * {@link PtySetter} will modify the value of an object field annotated
+	 * {@link PropertySetter} will modify the value of an object field annotated
 	 * by the {@code @Property} annotation with matching name.
 	 *
 	 * @param propertyName
@@ -251,7 +278,7 @@ public class Configurator {
 	 *	  target object on which to set the property
 	 *
 	 * @return
-	 *	  {@link PtySetter} which allows to configure the property on
+	 *	  {@link PropertySetter} which allows to configure the property on
 	 *	  the given object, or {@code null} if the target object has no field
 	 *	  with matching annotation
 	 */
@@ -264,25 +291,21 @@ public class Configurator {
 		// hierarchy and find the first field annotated with the
 		// @Property annotation matching the given property field.
 		//
-		for (final Field fld : new AllDeclaredFieldsIterable(target.getClass())) {
-			String cpn;
-
-			Property pty = fld.getAnnotation(Property.class);
-			if (pty == null) {
-				cpn = null;
-			}
-			else {
-				cpn = (pty.name().length() > 0) ? pty.name() : fld.getName();
+		for (final Field field : new AllDeclaredFieldsIterable(target.getClass())) {
+			String classPropertyName = null;
+			Property property = field.getAnnotation(Property.class);
+			if (property != null) {
+				classPropertyName = getPropertyName(property, field);
 			}
 
-			if (propertyName.equals(cpn)) {
+			if (propertyName.equals(classPropertyName)) {
 				//
 				// Match found -- create the setter.
 				//
 				return new PropertySetter() {
-					public void setValue(String val) throws ConfigurationException {
-						trace("setting field property %s to %s", propertyName, val);
-						configureFieldProperty(propertyName, target, val, fld);
+					public void setValue(String newValue) throws ConfigurationException {
+						trace("setting field property %s to %s", propertyName, newValue);
+						configureFieldProperty(propertyName, target, newValue, field);
 					}
 				};
 			}
@@ -362,7 +385,7 @@ public class Configurator {
 
 		// If there is no suitable constructor, try to create the instance by invoking a static factory method.
 		try {
-			Method fact =((Class<?>) field.getType()).getMethod("valueOf", new Class<?>[] { String.class });
+			Method fact = ((Class<?>) field.getType()).getMethod("valueOf", new Class<?>[] { String.class });
 			if (((Class<?>)field.getType()).isAssignableFrom(fact.getReturnType())) {
 				return fact.invoke(null, fieldValue);
 			}
@@ -378,9 +401,9 @@ public class Configurator {
 	 * ***********************************************************************/
 
 	/**
-	 * Returns a method based {@link PtySetter} bound to the given object
+	 * Returns a method based {@link PropertySetter} bound to the given object
 	 * and property name. When setting the property value, the returned
-	 * {@link PtySetter} will invoke a setter method annotated by the
+	 * {@link PropertySetter} will invoke a setter method annotated by the
 	 * {@link Setter} annotation with matching name.
 	 *
 	 * @param target
@@ -388,7 +411,7 @@ public class Configurator {
 	 * @param propertyName
 	 *	  name of the property to set
 	 * @return
-	 *	  {@link PtySetter} which allows to configure the property on
+	 *	  {@link PropertySetter} which allows to configure the property on
 	 *	  the given object, or {@code null} if the target object has no setter
 	 *	  method with matching annotation
 	 */
@@ -420,7 +443,7 @@ public class Configurator {
 				//
 				s = dm.getName();
 				if (s.startsWith("set")) {
-					s = s.substring( 3, 4 ).toLowerCase() + s.substring( 4 );
+					s = s.substring(3, 4).toLowerCase() + s.substring(4);
 				}
 			}
 			}
@@ -429,7 +452,7 @@ public class Configurator {
 				// Match found -- create the setter.
 				//
 				return new PropertySetter() {
-				public void setValue( String v ) {
+				public void setValue(String v) {
 				boolean oa;
 				trace("setting method property %s to %s", propertyName, v);
 				if ((Class<?>)dm.getReturnType() != void.class||dm.getParameterTypes()[0] != String.class||dm.getParameterTypes().length != 1) {
