@@ -170,7 +170,7 @@ public class Configurator {
 	}
 	
 	/**
-	 * Returns the value of the specified Field on the specified object.
+	 * Returns the value of the given Field on the given object.
 	 *
 	 * @param target
 	 *	  object with field
@@ -194,6 +194,30 @@ public class Configurator {
 		field.setAccessible(fieldAccesible);
 		
 		return fieldValue;
+	}
+
+	/**
+	 * Sets the value of the given field on the given object to its default value.
+	 *
+	 * @param target
+	 *	  object with field to set
+	 * @param property
+	 *	  property with its default value
+	 * @param field
+	 *	  field to set
+	 * @throws ConfigurationException 
+	 */	
+	private static void configureFieldPropertyToDefault(Object target, Property property, Field field) throws ConfigurationException {
+		//
+		// Set default value for null fields.
+		//
+		String propertyName = getPropertyName(property, field);
+		String defaultValue = property.defaultValue();
+		if (defaultValue == "" && property.isRequired()) {
+			throw new ConfigurationException("Required property '%s' is not configured", propertyName);
+		}
+		trace("setting field property %s to default value %s", propertyName, defaultValue);
+		configureFieldProperty(propertyName, target, defaultValue, field);
 	}
 	
 	/**
@@ -226,16 +250,7 @@ public class Configurator {
 					continue;
 				}
 
-				//
-				// Set default value for null fields.
-				//
-				String propertyName = getPropertyName(property, field);
-				String defaultValue = property.defaultValue();
-				if (defaultValue == "" && property.isRequired()) {
-					throw new ConfigurationException("Required property '%s' is not configured", propertyName);
-				}
-				trace("setting field property %s to default value %s", propertyName, defaultValue);
-				configureFieldProperty(propertyName, target, defaultValue, field);
+				configureFieldPropertyToDefault(target, property, field);
 			}
 
 		} catch(ConfigurationException configException) {

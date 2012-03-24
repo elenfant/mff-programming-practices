@@ -44,12 +44,15 @@ Configurator.getObjectFieldValue()
 - nová funkce pro získání field hodnoty objektu
 
 Configurator.getPropertyName()
-- nová funkce pro získání jména property, případně jména fieldu, pokud property má prázdné jméno  
+- nová funkce pro získání jména property, případně jména fieldu, pokud property má prázdné jméno
+
+Configurator.configureFieldPropertyToDefault()
+- nová funkce zapouzdřující nastavení defaultní hodnoty danému fieldu na objektu 
 
 Configurator.check()
 - přejmenování lokálních proměnných (ze zkratek)
 - inicializace při deklaraci, deklarace blízko prvního použití
-- použití getObjectFieldValue() a getPropertyName()
+- použití getObjectFieldValue(), getPropertyName() a configureFieldPropertyToDefault()
 - sjednocení testu před nastavením defaultní hodnoty
 - sjednocení testu na povinnou default hodnotu (zrušení else if () větve)
 - doplnění throws anotace
