@@ -45,7 +45,6 @@ public class Configurator {
 
 	public static Logger log = Logger.getAnonymousLogger();
 
-
 	/* ***********************************************************************
 	 * ANNOTATIONS
 	 * ***********************************************************************/
@@ -393,7 +392,7 @@ public class Configurator {
 	 *	  method with matching annotation
 	 */
 	static PropertySetter makeMethodSetter(final Object target, final String propertyName) {
-		Class<?> tc;
+		Class<?> targetClass;
 
 		//
 		// Find a setter method for the given property and create a
@@ -403,57 +402,71 @@ public class Configurator {
 		// hierarchy and find the first setter method annotated with the
 		// @Setter annotation matching the given property field.
 		//
-		tc = target.getClass();
+		targetClass = target.getClass();
 		do {
-		for (final Method dm : tc.getDeclaredMethods()) {
-			Setter str;
-			String s;
-			str = dm.getAnnotation(Setter.class);
-			if (str == null) {
-				s = null;
-			}
-			else {
-			s = str.name();
-			if (s.length() == 0) {
-				//
-				// If the method name starts with "set", strip the prefix and lower case the first letter of the suffix.
-				//
-				s = dm.getName();
-				if (s.startsWith("set")) {
-					s = s.substring( 3, 4 ).toLowerCase() + s.substring( 4 );
-				}
-			}
-			}
-			if (propertyName.equals(s)) {
-				//
-				// Match found -- create the setter.
-				//
-				return new PropertySetter() {
-				public void setValue( String v ) {
-				boolean oa;
-				trace("setting method property %s to %s", propertyName, v);
-				if ((Class<?>)dm.getReturnType() != void.class||dm.getParameterTypes()[0] != String.class||dm.getParameterTypes().length != 1) {
-					throw new ConfigurationException("property %s: method %s() is not a setter", propertyName, dm.getName());
-				}
-					try {
-						oa = dm.isAccessible();
-						dm.setAccessible(true);
-						dm.invoke(target, v);
-						dm.setAccessible(oa);
-					} catch(Exception e) {
-					wrap(e, "Unable to set property %s=%s using method %s()", propertyName, v, dm.getName());
-					}
-				}
-			};
-			}
-		}
-		tc = tc.getSuperclass();
-		} while (tc != null);
+            for (final Method declaredMethod : targetClass.getDeclaredMethods()) {
+                String fieldName = getMethodFieldName(declaredMethod);
+                if (propertyName.equals(fieldName)) {
+                    //
+                    // Match found -- create the setter.
+                    //
+                    return createMethodSetter(propertyName, declaredMethod, target);
+                }
+            }
+            targetClass = targetClass.getSuperclass();
+		} while (targetClass != null);
 		//
 		// No match found.
 		//
 		return null;
 	}
+
+    private static PropertySetter createMethodSetter(final String propertyName, final Method declaredMethod, final Object target) {
+        return new PropertySetter() {
+            public void setValue( String value ) {
+                trace("setting method property %s to %s", propertyName, value);
+
+                boolean hasReturnValue = (Class<?>)declaredMethod.getReturnType() != void.class;
+                boolean hasStringTypeParameter = declaredMethod.getParameterTypes()[0] == String.class;
+                boolean hasSingleParameter = declaredMethod.getParameterTypes().length == 1;
+
+                if (hasReturnValue || !hasSingleParameter || !hasStringTypeParameter) {
+                    throw new ConfigurationException("property %s: method %s() is not a setter", propertyName, declaredMethod.getName());
+                }
+
+                try {
+                        boolean isMethodAccessible = declaredMethod.isAccessible();
+                        declaredMethod.setAccessible(true);
+                        declaredMethod.invoke(target, value);
+                        declaredMethod.setAccessible(isMethodAccessible);
+                } catch(Exception e) {
+                    wrap(e, "Unable to set property %s=%s using method %s()", propertyName, value, declaredMethod.getName());
+                }
+            }
+        };
+    }
+
+    private static String getMethodFieldName(final Method declaredMethod) {
+        Setter setter;
+        String fieldName;
+        setter = declaredMethod.getAnnotation(Setter.class);
+        if (setter == null) {
+            fieldName = null;
+        }
+        else {
+            fieldName = setter.name();
+            if (fieldName.length() == 0) {
+                //
+                // If the method name starts with "set", strip the prefix and lower case the first letter of the suffix.
+                //
+                fieldName = declaredMethod.getName();
+                if (fieldName.startsWith("set")) {
+                    fieldName = fieldName.substring( 3, 4 ).toLowerCase() + fieldName.substring( 4 );
+                }
+            }
+        }
+        return fieldName;
+    }
 
 
 	/* ***********************************************************************

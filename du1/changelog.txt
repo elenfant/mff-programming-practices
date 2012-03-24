@@ -1,4 +1,4 @@
-                       Configurator.java Change Log
+﻿                       Configurator.java Change Log
                        ----------------------------
 
 Opravy:
@@ -39,3 +39,6 @@ Configurator.set()
 
 Všude
 - odstranění zkratek z názvů tříd, funkcí a jejich parametrů
+
+makeMethodSetter
+- z těla funkce extrahovány 2 funkce pro zpřehlednění, přejmenování proměnných podle jejich významu
