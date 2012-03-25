@@ -1,4 +1,4 @@
-﻿                       Configurator.java Change Log
+                       Configurator.java Change Log
                        ----------------------------
 
 Opravy:
@@ -40,5 +40,36 @@ Configurator.set()
 Všude
 - odstranění zkratek z názvů tříd, funkcí a jejich parametrů
 
-makeMethodSetter
-- z těla funkce extrahovány 2 funkce pro zpřehlednění, přejmenování proměnných podle jejich významu
+Configurator.getObjectFieldValue()
+- nová funkce pro získání field hodnoty objektu
+
+Configurator.getPropertyName()
+- nová funkce pro získání jména property, případně jména fieldu, pokud property má prázdné jméno
+
+Configurator.configureFieldPropertyToDefault()
+- nová funkce zapouzdřující nastavení defaultní hodnoty danému fieldu na objektu 
+
+Configurator.check()
+- přejmenování lokálních proměnných (ze zkratek)
+- inicializace při deklaraci, deklarace blízko prvního použití
+- použití getObjectFieldValue(), getPropertyName() a configureFieldPropertyToDefault()
+- sjednocení testu před nastavením defaultní hodnoty
+- sjednocení testu na povinnou default hodnotu (zrušení else if () větve)
+- doplnění throws anotace
+
+Configurator.makeFieldPropertySetter()
+- getPropertyName()
+- inicializace proměnné classPropertyName;
+- obrácení podmínky u (property == null) -> spolu s inicializací ušetří jednu else větev
+
+Configurator.makeValueInstance()
+- nahrazen ten zběsilý return
+- v rámci něho změněno pole (new Class<?>[] { String.class }) na jednu třídu (String.class)
+
+TODO
+- sjednocení pořadí parametrů u funkcí (target, name a naopak)
+- přidat throws ExceptionClass za jednotlivé fce nebo @throws(classOf[Exception]) anotaci?
+- doplnit komentáře k novým funkcím? (včetně javadocu)
+- nemá interface začínat na I?
+- 80 znaků na šířku
+- zrušit všechny Warningy
