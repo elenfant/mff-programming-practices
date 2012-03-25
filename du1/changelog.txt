@@ -52,7 +52,7 @@ Configurator.getPropertyName()
 	má prázdné jméno
 
 Configurator.setFieldPropertyToDefault()
-- nová funkce zapouzdřující nastavení defaultní hodnoty danému fieldu na objektu
+- nová funkce zapouzdřující nastavení default hodnoty danému fieldu na objektu
 
 Configurator.configureFieldProperty()
 - přejmenována na setFieldProperty() 
