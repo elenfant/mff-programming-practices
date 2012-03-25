@@ -131,7 +131,7 @@ public class Configurator {
 	 *	  if the value of the given property cannot be set on the
 	 *	  given object
 	 */
-	public static void set(Object target, String propertyName, 
+	public static void set(Object target, String propertyName,
 			String propertyValue) {
 		//
 		// First try to obtain a method based setter, which is necessary
@@ -156,7 +156,7 @@ public class Configurator {
 		//
 		setter.setValue(propertyValue);
 	}
-	
+
 	/**
 	 * Checks if all configurable fields in the passed object are not null.
 	 *
@@ -198,21 +198,21 @@ public class Configurator {
 			wrap(anyException, "Unable to verify object property configuration!");
 		}
 	}
-	
+
 	/* ***********************************************************************
 	 * PRIVATE METHODS
 	 * ***********************************************************************/
 
 	/**
 	 * Returns the name of specified Property.
-	 * If it has empty name, return it's field name instead. 
+	 * If it has empty name, return it's field name instead.
 	 * if property has .
 	 *
 	 * @param property
 	 *	  object with field field
 	 * @param field
 	 *	  field
-	 */	
+	 */
 	private static String getPropertyName(Property property, Field field) {
 		assert(property != null && field != null);
 
@@ -224,7 +224,7 @@ public class Configurator {
 		}
 
 	}
-	
+
 	/**
 	 * Returns the value of the given Field on the given object.
 	 *
@@ -232,9 +232,9 @@ public class Configurator {
 	 *	  object with field
 	 * @param field
 	 *	  field
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 */	
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 */
 	private static Object getObjectFieldValue(Object target, Field field) throws IllegalArgumentException, IllegalAccessException {
 		if (field == null) {
 			return null;
@@ -248,7 +248,7 @@ public class Configurator {
 		field.setAccessible(true);
 		Object fieldValue = field.get(target);
 		field.setAccessible(fieldAccesible);
-		
+
 		return fieldValue;
 	}
 
@@ -290,8 +290,8 @@ public class Configurator {
 	 *	  property with its default value
 	 * @param field
 	 *	  field to set
-	 * @throws ConfigurationException 
-	 */	
+	 * @throws ConfigurationException
+	 */
 	private static void configureFieldPropertyToDefault(Object target, Property property, Field field) throws ConfigurationException {
 		//
 		// Set default value for null fields.
@@ -473,8 +473,9 @@ public class Configurator {
 	 *	  the given object, or {@code null} if the target object has no setter
 	 *	  method with matching annotation
 	 */
-	static PropertySetter makeMethodSetter(final Object target, final String propertyName) {
-		Class<?> tc;
+	static PropertySetter makeMethodSetter(final Object target,
+            final String propertyName) {
+		Class<?> targetClass;
 
 		//
 		// Find a setter method for the given property and create a
@@ -484,57 +485,108 @@ public class Configurator {
 		// hierarchy and find the first setter method annotated with the
 		// @Setter annotation matching the given property field.
 		//
-		tc = target.getClass();
+		targetClass = target.getClass();
 		do {
-		for (final Method dm : tc.getDeclaredMethods()) {
-			Setter str;
-			String s;
-			str = dm.getAnnotation(Setter.class);
-			if (str == null) {
-				s = null;
-			}
-			else {
-			s = str.name();
-			if (s.length() == 0) {
-				//
-				// If the method name starts with "set", strip the prefix and lower case the first letter of the suffix.
-				//
-				s = dm.getName();
-				if (s.startsWith("set")) {
-					s = s.substring(3, 4).toLowerCase() + s.substring(4);
-				}
-			}
-			}
-			if (propertyName.equals(s)) {
-				//
-				// Match found -- create the setter.
-				//
-				return new PropertySetter() {
-				public void setValue(String v) {
-				boolean oa;
-				trace("setting method property %s to %s", propertyName, v);
-				if ((Class<?>)dm.getReturnType() != void.class||dm.getParameterTypes()[0] != String.class||dm.getParameterTypes().length != 1) {
-					throw new ConfigurationException("property %s: method %s() is not a setter", propertyName, dm.getName());
-				}
-					try {
-						oa = dm.isAccessible();
-						dm.setAccessible(true);
-						dm.invoke(target, v);
-						dm.setAccessible(oa);
-					} catch(Exception e) {
-					wrap(e, "Unable to set property %s=%s using method %s()", propertyName, v, dm.getName());
-					}
-				}
-			};
-			}
-		}
-		tc = tc.getSuperclass();
-		} while (tc != null);
+            for (final Method declaredMethod :
+                    targetClass.getDeclaredMethods()) {
+                String fieldName = getMethodFieldName(declaredMethod);
+                if (propertyName.equals(fieldName)) {
+                    //
+                    // Match found -- create the setter.
+                    //
+                    return createMethodSetter(propertyName, declaredMethod,
+                            target);
+                }
+            }
+            targetClass = targetClass.getSuperclass();
+		} while (targetClass != null);
 		//
 		// No match found.
 		//
 		return null;
 	}
+
+    /**
+	 * Creates a method based {@link PropertySetter} bound to the given object
+	 * and property name.
+	 *
+	 * @param propertyName
+	 *	  name of the property to set
+	 * @param declaredMethod
+	 *	  method which sets given property
+     * @param target
+     *    target object on which to set the property
+	 * @return
+	 *	  {@link PropertySetter} which allows to configure the property on
+	 *	  the given object
+	 */
+    private static PropertySetter createMethodSetter(final String propertyName,
+            final Method declaredMethod, final Object target) {
+        return new PropertySetter() {
+            public void setValue( String value ) {
+                trace("setting method property %s to %s", propertyName, value);
+
+                boolean hasReturnValue =
+                        (Class<?>)declaredMethod.getReturnType() != void.class;
+                boolean hasStringTypeParameter =
+                        declaredMethod.getParameterTypes()[0] == String.class;
+                boolean hasSingleParameter =
+                        declaredMethod.getParameterTypes().length == 1;
+
+                if (hasReturnValue || !hasSingleParameter ||
+                        !hasStringTypeParameter) {
+                    throw new ConfigurationException
+                            ("property %s: method %s() is not a setter",
+                            propertyName, declaredMethod.getName());
+                }
+
+                try {
+                        boolean isMethodAccessible =
+                                declaredMethod.isAccessible();
+                        declaredMethod.setAccessible(true);
+                        declaredMethod.invoke(target, value);
+                        declaredMethod.setAccessible(isMethodAccessible);
+                } catch(Exception e) {
+                    wrap(e, "Unable to set property %s=%s using method %s()",
+                            propertyName, value, declaredMethod.getName());
+                }
+            }
+        };
+    }
+
+    /**
+	 * Looks for field name which given method is setter for, if any,
+     * and returns it.
+	 *
+	 * @param declaredMethod
+	 *	  analyzed method
+
+	 * @return
+	 *	  string with field name for given method is setter for, or method name
+	 */
+    private static String getMethodFieldName(final Method declaredMethod) {
+        Setter setter;
+        String fieldName;
+        setter = declaredMethod.getAnnotation(Setter.class);
+        if (setter == null) {
+            fieldName = null;
+        }
+        else {
+            fieldName = setter.name();
+            if (fieldName.length() == 0) {
+                //
+                // If the method name starts with "set", strip the prefix
+                // and lower case the first letter of the suffix.
+                //
+                fieldName = declaredMethod.getName();
+                if (fieldName.startsWith("set")) {
+                    fieldName = fieldName.substring( 3, 4 ).toLowerCase()
+                                + fieldName.substring( 4 );
+                }
+            }
+        }
+        return fieldName;
+    }
 
 
 	/* ***********************************************************************
@@ -559,7 +611,8 @@ public class Configurator {
 		ConfigurationException(String format, Object ... args) {
 			super(String.format(format, args));
 		}
-		ConfigurationException(Throwable throwable, String format, Object ... args) {
+		ConfigurationException(Throwable throwable, String format,
+                Object ... args) {
 			super(String.format(format, args), throwable);
 		}
 	}
@@ -569,7 +622,8 @@ public class Configurator {
 	 * Wraps the given {@link Throwable} as a {@link ConfigurationException}
 	 * along with an additional formatted message.
 	 */
-	private static void wrap(Throwable throwable, String format, Object ... args) {
+	private static void wrap(Throwable throwable, String format,
+            Object ... args) {
 		throw new ConfigurationException(throwable, format, args);
 	}
 
@@ -614,7 +668,7 @@ public class Configurator {
 					if (klass == null) {
 						return false;
 					}
-					fields = new ArrayIterator<Field>(klass.getDeclaredFields());
+					fields = new ArrayIterator<>(klass.getDeclaredFields());
 					klass = klass.getSuperclass();
 				}
 				return true;
