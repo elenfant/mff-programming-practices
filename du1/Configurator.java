@@ -1,5 +1,4 @@
-//package org.ow2.dsrg.jpmf.util;
-package du1;
+package org.ow2.dsrg.jpmf.util;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
