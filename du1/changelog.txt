@@ -1,4 +1,4 @@
-                       Configurator.java Change Log
+﻿                       Configurator.java Change Log
                        ----------------------------
 
 Opravy:
@@ -39,6 +39,9 @@ Configurator.set()
 
 Všude
 - odstranění zkratek z názvů tříd, funkcí a jejich parametrů
+- sjednocení pořadí parametrů u funkcí (target, name a naopak)
+- přidání throws ExceptionClass za jednotlivé fce nebo @throws(classOf[Exception]) anotaci
+- 80 znaků na šířku
 
 Configurator.getObjectFieldValue()
 - nová funkce pro získání field hodnoty objektu
@@ -66,10 +69,19 @@ Configurator.makeValueInstance()
 - nahrazen ten zběsilý return
 - v rámci něho změněno pole (new Class<?>[] { String.class }) na jednu třídu (String.class)
 
+Configurator.makeMethodSetter()
+- přejmenování lokálních proměnných (ze zkratek)
+- vyčlenění kódu do samostatných funkcí
+
+Configurator.createMethodSetter()
+- nová funkce pro vytvoření PropertySetteru pro danou property, která použije danou Setter metodu
+
+Configurator.getMethodFieldName()
+-nová funkce zapouzdřující hledání fieldu, který nastavuje daná metoda
+
+
+
 TODO
-- sjednocení pořadí parametrů u funkcí (target, name a naopak)
-- přidat throws ExceptionClass za jednotlivé fce nebo @throws(classOf[Exception]) anotaci?
 - doplnit komentáře k novým funkcím? (včetně javadocu)
-- nemá interface začínat na I?
-- 80 znaků na šířku
+- nemá interface začínat na I? http://stackoverflow.com/questions/541912/interface-naming-in-java
 - zrušit všechny Warningy

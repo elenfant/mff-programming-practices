@@ -43,7 +43,7 @@ import java.util.logging.Logger;
  */
 public class Configurator {
 
-	public static Logger log = Logger.getAnonymousLogger();
+	public static final Logger log = Logger.getAnonymousLogger();
 
 
 	/* ***********************************************************************
@@ -141,7 +141,7 @@ public class Configurator {
 		//
 		PropertySetter setter = makeMethodSetter(target, propertyName);
 		if (setter == null) {
-			setter = makeFieldPropertySetter(propertyName, target);
+			setter = makeFieldPropertySetter(target, propertyName);
 		}
 		if (setter == null) {
 			if (log.isLoggable(Level.WARNING)) {
@@ -195,7 +195,8 @@ public class Configurator {
 			// propagate without wrapping
 			throw configException;
 		} catch(Exception anyException) {
-			wrap(anyException, "Unable to verify object property configuration!");
+			wrap(anyException,
+                    "Unable to verify object property configuration!");
 		}
 	}
 
@@ -235,10 +236,10 @@ public class Configurator {
 	 * @throws IllegalAccessException
 	 * @throws IllegalArgumentException
 	 */
-	private static Object getObjectFieldValue(Object target, Field field) throws IllegalArgumentException, IllegalAccessException {
+	private static Object getObjectFieldValue(Object target, Field field)
+            throws IllegalArgumentException, IllegalAccessException {
 		if (field == null) {
 			return null;
-			// throw new NullPointerException("Required parametr field is null.");
 		}
 		//
 		// Make the field accessible before getting its value and
@@ -266,8 +267,11 @@ public class Configurator {
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 */
-	private static void setObjectFieldValue(Object target, Field field, Object valueInstance) throws IllegalArgumentException, IllegalAccessException {
-		// method called internally, so parameters shouldn't be null in this time
+	private static void setObjectFieldValue(Object target, Field field,
+            Object valueInstance)
+            throws IllegalArgumentException, IllegalAccessException {
+		// method called internally, so parameters shouldn't be null in this
+        // time
 		assert(target != null && field != null && valueInstance != null);
 		assert(field.getType() == valueInstance.getClass());
 		//
@@ -282,7 +286,8 @@ public class Configurator {
 
 
 	/**
-	 * Sets the value of the given field on the given object to its default value.
+	 * Sets the value of the given field on the given object to its default
+     * value.
 	 *
 	 * @param target
 	 *	  object with field to set
@@ -292,17 +297,20 @@ public class Configurator {
 	 *	  field to set
 	 * @throws ConfigurationException
 	 */
-	private static void configureFieldPropertyToDefault(Object target, Property property, Field field) throws ConfigurationException {
+	private static void configureFieldPropertyToDefault(Object target,
+            Property property, Field field) throws ConfigurationException {
 		//
 		// Set default value for null fields.
 		//
 		String propertyName = getPropertyName(property, field);
 		String defaultValue = property.defaultValue();
-		if (defaultValue == "" && property.isRequired()) {
-			throw new ConfigurationException("Required property '%s' is not configured", propertyName);
+		if (defaultValue.equals("") && property.isRequired()) {
+			throw new ConfigurationException(
+                    "Required property '%s' is not configured", propertyName);
 		}
-		trace("setting field property %s to default value %s", propertyName, defaultValue);
-		configureFieldProperty(propertyName, target, defaultValue, field);
+		trace("setting field property %s to default value %s", propertyName,
+                defaultValue);
+		configureFieldProperty(target, propertyName, defaultValue, field);
 	}
 
 	/* ***********************************************************************
@@ -330,17 +338,18 @@ public class Configurator {
 	 * {@link PropertySetter} will modify the value of an object field annotated
 	 * by the {@code @Property} annotation with matching name.
 	 *
+     * @param target
+	 *	  target object on which to set the property
 	 * @param propertyName
 	 *	  name of the property to set
-	 * @param target
-	 *	  target object on which to set the property
 	 *
 	 * @return
 	 *	  {@link PropertySetter} which allows to configure the property on
 	 *	  the given object, or {@code null} if the target object has no field
 	 *	  with matching annotation
 	 */
-	static PropertySetter makeFieldPropertySetter(final String propertyName, final Object target) {
+	static PropertySetter makeFieldPropertySetter(final Object target,
+            final String propertyName) {
 		//
 		// Find a configurable field for the given property and create a
 		// PropertySetter for the property.
@@ -349,7 +358,8 @@ public class Configurator {
 		// hierarchy and find the first field annotated with the
 		// @Property annotation matching the given property field.
 		//
-		for (final Field field : new AllDeclaredFieldsIterable(target.getClass())) {
+		for (final Field field :
+                new AllDeclaredFieldsIterable(target.getClass())) {
 			String classPropertyName = null;
 			Property property = field.getAnnotation(Property.class);
 			if (property != null) {
@@ -361,9 +371,13 @@ public class Configurator {
 				// Match found -- create the setter.
 				//
 				return new PropertySetter() {
-					public void setValue(String newValue) throws ConfigurationException {
-						trace("setting field property %s to %s", propertyName, newValue);
-						configureFieldProperty(propertyName, target, newValue, field);
+                    @Override
+					public void setValue(String newValue)
+                            throws ConfigurationException {
+						trace("setting field property %s to %s", propertyName,
+                                newValue);
+						configureFieldProperty(target, propertyName, newValue,
+                                field);
 					}
 				};
 			}
@@ -381,10 +395,10 @@ public class Configurator {
 	 * value is converted from string representation to an instance of
 	 * the field type.
 	 *
+     * @param target
+	 *	  target object on which to set the field value
 	 * @param propertyName
 	 *	  name of the property being configured
-	 * @param target
-	 *	  target object on which to set the field value
 	 * @param propertyValue
 	 *	  string value of the property being configured
 	 * @param field
@@ -395,29 +409,34 @@ public class Configurator {
 	 *	  converted to an instance of the field type or if setting
 	 *	  the field failed
 	 */
-	static void configureFieldProperty(String propertyName, Object target, String propertyValue, Field field) throws ConfigurationException {
+	static void configureFieldProperty(Object target, String propertyName,
+            String propertyValue, Field field) throws ConfigurationException {
 		//
 		// Create an instance of the property value and set the field
 		// value on the target object.
 		//
 		Object valueInstance = makeValueInstance(field, propertyValue);
 		if (valueInstance == null) {
-			throw new ConfigurationException("property %s: could not create %s instance for %s", propertyName, field.getType().getName(), propertyValue);
+			throw new ConfigurationException(
+                    "property %s: could not create %s instance for %s",
+                    propertyName, field.getType().getName(), propertyValue);
 		}
 
 		try {
 			setObjectFieldValue(target, field, valueInstance);
 		} catch(Exception anyException) {
-			wrap(anyException, "Unable to configure field %s with property %s=%s", field.getName(), propertyName, propertyValue);
+			wrap(anyException, "Unable to configure field %s with property "
+                    + "%s=%s", field.getName(), propertyName, propertyValue);
 		}
 	}
 
 
 	/**
-	 * Creates an object instance from the string representation of a property value.
-	 * The instance type is determined by the type of the given field and the instance
-	 * is created either by calling a string constructor or a static factory method on
-	 * the field class.
+	 * Creates an object instance from the string representation of a property
+     * value.
+	 * The instance type is determined by the type of the given field and the
+     * instance is created either by calling a string constructor or a static
+     * factory method on the field class.
 	 *
 	 * @param field
 	 *	  field to create value for
@@ -428,19 +447,23 @@ public class Configurator {
 	 *	  {@code null} if the instance could not be created
 	 */
 	static Object makeValueInstance(Field field, String fieldValue) {
-		// First try to create the value instance by invoking a string constructor of the field class.
+		// First try to create the value instance by invoking a string
+        // constructor of the field class.
 		try {
 			Class<?> fieldClass = field.getType();
-			Constructor<?> fieldConstructor = fieldClass.getConstructor(String.class); //new Class <?> [] { String.class }
+			Constructor<?> fieldConstructor =
+                    fieldClass.getConstructor(String.class);
 			return fieldConstructor.newInstance(fieldValue);
 		} catch(Exception anyException) {
 			/* quell the exception and try the next method */
 		}
 
-		// If there is no suitable constructor, try to create the instance by invoking a static factory method.
+		// If there is no suitable constructor, try to create the instance by
+        // invoking a static factory method.
 		try {
 			Class<?> fieldClass = field.getType();
-			Method factoryMethod = fieldClass.getMethod("valueOf", new Class<?>[] { String.class });
+			Method factoryMethod = fieldClass.getMethod("valueOf",
+                    new Class<?>[] { String.class });
 			Class<?> returnType = factoryMethod.getReturnType();
 			if (fieldClass.isAssignableFrom(returnType)) {
 				return factoryMethod.invoke(null, fieldValue);
@@ -472,9 +495,10 @@ public class Configurator {
 	 *	  {@link PropertySetter} which allows to configure the property on
 	 *	  the given object, or {@code null} if the target object has no setter
 	 *	  method with matching annotation
+     * @throws SecurityException
 	 */
 	static PropertySetter makeMethodSetter(final Object target,
-            final String propertyName) {
+            final String propertyName) throws SecurityException {
 		Class<?> targetClass;
 
 		//
@@ -494,8 +518,8 @@ public class Configurator {
                     //
                     // Match found -- create the setter.
                     //
-                    return createMethodSetter(propertyName, declaredMethod,
-                            target);
+                    return createMethodSetter(target, propertyName,
+                            declaredMethod);
                 }
             }
             targetClass = targetClass.getSuperclass();
@@ -520,10 +544,11 @@ public class Configurator {
 	 *	  {@link PropertySetter} which allows to configure the property on
 	 *	  the given object
 	 */
-    private static PropertySetter createMethodSetter(final String propertyName,
-            final Method declaredMethod, final Object target) {
+    private static PropertySetter createMethodSetter(final Object target,
+            final String propertyName, final Method declaredMethod) {
         return new PropertySetter() {
-            public void setValue( String value ) {
+            @Override
+            public void setValue(String value) throws ConfigurationException {
                 trace("setting method property %s to %s", propertyName, value);
 
                 boolean hasReturnValue =
@@ -535,8 +560,8 @@ public class Configurator {
 
                 if (hasReturnValue || !hasSingleParameter ||
                         !hasStringTypeParameter) {
-                    throw new ConfigurationException
-                            ("property %s: method %s() is not a setter",
+                    throw new ConfigurationException(
+                            "property %s: method %s() is not a setter",
                             propertyName, declaredMethod.getName());
                 }
 
@@ -562,7 +587,7 @@ public class Configurator {
 	 *	  analyzed method
 
 	 * @return
-	 *	  string with field name for given method is setter for, or method name
+	 *	  string with field name for given method is setter for
 	 */
     private static String getMethodFieldName(final Method declaredMethod) {
         Setter setter;
@@ -658,6 +683,7 @@ public class Configurator {
 			private Class<?> klass = leaf;
 			private Iterator<Field> fields = new ArrayIterator<>(new Field[0]);
 
+                @Override
 			public boolean hasNext() {
 				//
 				// If there are no fields, check if there is another class
@@ -682,6 +708,7 @@ public class Configurator {
 				return fields.next();
 			}
 
+                @Override
 			public void remove() {
 				throw new UnsupportedOperationException();
 			}
@@ -707,9 +734,11 @@ public class Configurator {
 
 		@Override
 		public void remove() {
-			throw new UnsupportedOperationException("cannot remove elements from array");
+			throw new UnsupportedOperationException(
+                    "cannot remove elements from array");
 		}
 
+        @Override
 		public boolean hasNext() {
 			return position < length;
 		}
