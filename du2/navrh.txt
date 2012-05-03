@@ -1,0 +1,26 @@
+Option/Argument/Parameter - tøída s definicí daného parametru, nejspíše více tøíd dle druhù parametrù
+OptionHolder/Options/OptionManager - tøída se všemi parametry, hlavní tøída programu
+Parser - tøída zajišující parsování pøíkazové øádky, pouze privátní
+
+volby budou definované odpovídající promìnnou a pøíslušnım konstruktorem volby, 
+kde se zadají všechna synonyma, jde o kompaktní a pøehlednı zpùsob definice
+--všechna synonyma budou pro úèely parsování uloena ve slovníku s odkazem na objekt pøíslušné volby
+
+díky definici pomocí promìnnıch bude mít uivatel snadnı a pøímı pøístup k jednotlivım volbám 
+a hodnotám jejich parametrù
+
+kontrola bude probíhat automaticky bìhem zpracování pøíkazové øádky tak, aby program zbyteènì nebìel, 
+pokud nemá platnı vstup, nebo o tom byl uivatel alespoò vèas informován
+--pouil bych vıjimky, v tìle vıjimky potom informaci o popisu chyby
+--moná rovnou informace o chybì na vıstup, kdy u tam knihovna bude stejnì psát - minimálnì help
+
+z funkèních poadavkù mám problém akorát s verzí volby, která má nepovinnı parametr, 
+tady mì nenapadá, jak to jednoduše realizovat
+
+postup bìhu knihovny
+- uivatel definuje volby v rámci zvláštní tøídy, mimo svùj hlavní kód tak, aby se mu to nemíchalo dohromady
+- na zaèátku bìhu programu pøedá argumenty pøíkazové øádky naší tøídì ke zpracování
+- zpracujeme pøíkazovou øádku, nastavíme pøíslušné hodnoty promìnnıch a v pøípadì chyby vyhodímì vıjimku
+--to je asi celı
+
+tøída Attribute - od té budeme dìdit, abychom mohli pouívat ty konstruktory v [] závorkách
