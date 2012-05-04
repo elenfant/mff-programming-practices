@@ -24,3 +24,15 @@ postup bìhu knihovny
 --to je asi celı
 
 tøída Attribute - od té budeme dìdit, abychom mohli pouívat ty konstruktory v [] závorkách
+
+popis rozhrani:
+public - pouze Base tøída pro definici atributù - urèená pro dìdìní
+       - jednotlivé typy parametrù a jejich konstruktory
+       - metoda Initialize(args) nebo tak nìjak na Base tøídì, která udìlá vše potøebné
+
+Atributy - spoleèné vlastnosti - seznam krátkıch názvù, seznam dlouhıch názvù, hodnotová promìnná, popis volby
+
+Parser  - privátní tøída pro interní pouití, inicializovaná tøídou s atributy
+	- metoda ProcessCommandLine(args) - vlastní zpracování parametrù
+	- pracuje se slovníkem názvù - zvláš krátké a dlouhé, odkaz na odpovídající atribut
+	- asi prochází jednotlivé volby na pøíkazové øádce, hledá je ve slovníku a dále je zpracovává
