@@ -1,1 +1,5 @@
 C:\Users\Bogo\mff-programming-practices\du2\OptionLib\OptionLib\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\Bogo\mff-programming-practices\du2\OptionLib\OptionLib\bin\Debug\OptionLib.dll
+C:\Users\Bogo\mff-programming-practices\du2\OptionLib\OptionLib\bin\Debug\OptionLib.pdb
+C:\Users\Bogo\mff-programming-practices\du2\OptionLib\OptionLib\obj\Debug\OptionLib.dll
+C:\Users\Bogo\mff-programming-practices\du2\OptionLib\OptionLib\obj\Debug\OptionLib.pdb
