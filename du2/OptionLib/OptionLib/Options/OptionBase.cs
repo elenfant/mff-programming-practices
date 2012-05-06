@@ -32,10 +32,10 @@ namespace OptionLib
         /// <summary>
         /// Builts output help text.
         /// </summary>
-        /// <param name="shortNames">Short names of this option</param>
-        /// <param name="longNames">Long names of this option</param>
-        /// <returns>Formatted help text descripting this option</returns>
-        public string GetHelpText(List<string> shortNames, List<string> longNames) {
+        /// <param name="shortNames">Short names of this option.</param>
+        /// <param name="longNames">Long names of this option.</param>
+        /// <returns>Formatted help text descripting this option.</returns>
+        public string GetHelpText(IList<string> shortNames, IList<string> longNames) {
             StringBuilder namesHelpText = new StringBuilder();
             bool firstName = true;
             foreach (string shortName in shortNames) {

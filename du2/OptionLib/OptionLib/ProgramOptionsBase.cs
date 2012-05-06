@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Reflection;
 
 namespace OptionLib
 {
@@ -41,7 +42,7 @@ namespace OptionLib
 
             optionList = new List<ProgramOption>();
 
-            var fieldInfos = this.GetType().GetFields();
+            var fieldInfos = this.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
             foreach (var fieldInfo in fieldInfos) {
                 Attribute optionAttribute = Attribute.GetCustomAttribute(fieldInfo, typeof(OptionBase));
                 if (optionAttribute == null) {
@@ -53,8 +54,8 @@ namespace OptionLib
                 optionList.Add(option);
             }
 
-            //vytvorim parser a zavolam na nem Parse(optionList, args);
-
+            ArgumentParser argParser = new ArgumentParser(this);
+            arguments.Concat(argParser.ParseCommandLine(optionList, args));
             CheckRequiredOptions();
         }
 

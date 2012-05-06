@@ -19,41 +19,65 @@ namespace OptionLib
             this.fieldInfo = fieldInfo;
             this.optionAttribute = optionBase;
             if (shortNameAttribute != null) {
-                shortNames = shortNameAttribute.Names;
+                shortNames = shortNameAttribute.Names.AsReadOnly();
             }
             else {
-                shortNames = new List<string>();
+                shortNames = new List<string>().AsReadOnly();
             }
             if (longNameAttribute != null) {
-                longNames = longNameAttribute.Names;
+                longNames = longNameAttribute.Names.AsReadOnly();
             }
             else {
-                longNames = new List<string>();
+                longNames = new List<string>().AsReadOnly();
+            }
+
+            if (longNames.Count == 0 && shortNames.Count == 0)
+            {
+                throw new NotSupportedException("Option must have at least one name. Add ShortName and/or LongName attribute.");
             }
         }
 
-        public List<string> ShortNames {
+        public IList<string> ShortNames {
             get {
                 return shortNames;
             }
         }
 
-        public List<string> LongNames {
+        public IList<string> LongNames {
             get {
                 return longNames;
             }
         }
+
+        public string Name {
+            get {
+                if (longNames.Count > 0)
+                {
+                    return longNames[0];
+                }
+                else
+                {
+                    /* there has to be at least one name, otherwise contructor would fail  */
+                    return shortNames[0];
+                }
+            }
+        }
+
+        private readonly IList<string> shortNames;
+        private readonly IList<string> longNames;
 
         public bool IsPresent {
             get;
             private set;
         }
 
-        private List<string> shortNames;
-        private List<string> longNames;
-
         public Type GetOptionType() {
             return fieldInfo.FieldType;
+        }
+
+        public Type GetOptionAttributeType()
+        {
+            return optionAttribute.GetType();
         }
 
         public bool IsRequired()
@@ -61,13 +85,13 @@ namespace OptionLib
             return optionAttribute.Required;
         }
 
-        /// <summary>
-        /// Sets value to corresponding option. Parser string representation and sets it to corresponding variable
-        /// </summary>
-        /// <param name="textValue">Value in string representation</param>
-        /// <param name="options">Options object to set value on</param>
-        /// <returns></returns>
-        private bool SetValue(string textValue, ProgramOptionsBase options) {
+        /* POZOR?
+         * field values k danym klicum mohou byt promenne majici zatim null hodnotu, takze je treba kontrolovat pomoci
+         * field.IsDefined()!!!
+         * 
+         * field.SetValue(options, parsedvalue);
+         */
+        public bool SetValue(string textValue, ProgramOptionsBase options) {
             Type fieldType = fieldInfo.FieldType;
 
             if (fieldType == typeof(string)) {
@@ -86,12 +110,6 @@ namespace OptionLib
             return true;
         }
 
-        /// <summary>
-        /// Parses and sets Enum value to option.
-        /// </summary>
-        /// <param name="textValue">Value in string representation</param>
-        /// <param name="options">Options object to set value on</param>
-        /// <returns></returns>
         private bool SetEnumValue(string textValue, ProgramOptionsBase options) {
             try {
                 var value = Enum.Parse(fieldInfo.FieldType, textValue, true);
@@ -103,10 +121,19 @@ namespace OptionLib
             return true;
         }
 
-        /// <summary>
-        /// Prints description of option.
-        /// </summary>
-        /// <returns>Formatted description</returns>
+        public void SetValueToDefault(ProgramOptionsBase programOptions)
+        {
+            if (optionAttribute.GetType() != typeof(OptionWithParameterAttribute))
+            {
+                throw new NotSupportedException("Option " + optionAttribute.GetType() + " doesn't have any default value.");
+            }
+            /* user has to set DefaultValue in correct type */
+            fieldInfo.SetValue(programOptions, ((OptionWithOptionableParameterAttribute)optionAttribute).DefaultValue);
+            IsPresent = true;
+        }
+
+
+
         public string PrintHelp() {
             return optionAttribute.GetHelpText(shortNames, longNames);
         }
