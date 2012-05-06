@@ -5,11 +5,11 @@ using System.Text;
 
 namespace OptionLib.Other
 {
-    class OptionAttribute : OptionBase
+    public class OptionAttribute : OptionBase
     {
-        public OptionAttribute(string shortName, string longName, string description, bool required = false)
+        public OptionAttribute(string description)
         {
-
+            this.description = description;
         }
 
         public OptionAttribute(ICollection<string> shortNames, ICollection<string> longNames, string description, bool required = false)

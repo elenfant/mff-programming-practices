@@ -5,7 +5,20 @@ using System.Text;
 
 namespace OptionLib.Other
 {
-    class ProgramOptionsBase
+    public class ProgramOptionsBase
     {
+        public List<string> arguments = new List<string>();
+        private ArgumentParser parser = new ArgumentParser();
+        private SortedSet<OptionBase> requiredOptions = new SortedSet<OptionBase>();
+
+        public void Initialize(string[] args)
+        {
+            arguments = parser.ProcessCommandLine(this, args);
+        }
+
+        public void AddRequiredOption(OptionBase option)
+        {
+            requiredOptions.Add(option);
+        }
     }
 }

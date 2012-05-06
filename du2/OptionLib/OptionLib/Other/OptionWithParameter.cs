@@ -5,11 +5,18 @@ using System.Text;
 
 namespace OptionLib.Other
 {
-    class OptionWithParameterAttribute : OptionBase
+    public class OptionWithParameterAttribute : OptionBase
     {
-        public OptionWithParameterAttribute(string shortName, string longName, string description, string parameterName = "PAR", bool required = false)
+        protected bool parameterRequired;
+
+        public bool isRequired()
         {
- 
+            return parameterRequired;
+        }
+
+        public OptionWithParameterAttribute(string description, string parameterName = "PAR", bool required = false)
+        {
+            this.parameterRequired = required;
         }
     }
 }
