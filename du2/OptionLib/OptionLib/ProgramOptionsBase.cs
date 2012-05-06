@@ -27,9 +27,11 @@ namespace OptionLib
         /// Prints program help and description of all defined options
         /// </summary>
         public void PrintHelp() {
+            Console.WriteLine(GetProgramHelpText());
             foreach (ProgramOption option in optionList) {
                 Console.WriteLine(option.PrintHelp());
             }
+            Console.WriteLine(TerminateOptionListText);
         }
 
         /// <summary>
@@ -54,6 +56,33 @@ namespace OptionLib
 
             ArgumentParser argParser = new ArgumentParser(this);
             arguments.Concat(argParser.ParseCommandLine(optionList, args));
+            CheckRequiredOptions();
         }
+
+        [Option(Description = "Print a usage message on standard output and exit successfully.")]
+        [LongName("help")]
+        public bool help;
+
+        [Option(Description = "Print version information on standard output, then exit successfully.")]
+        [ShortName("V"), LongName("version")]
+        public bool version;
+
+        private void CheckRequiredOptions() {
+            foreach (var option in optionList) {
+                if (option.IsRequired() && !option.IsPresent) {
+                //TODO: Required option is not present!
+                }
+            }
+        }
+
+        public abstract string GetProgramHelpText();
+
+        public void PrintVersion() {
+            Console.WriteLine(GetVersionInformation());
+        }
+
+        public abstract string GetVersionInformation();
+
+        private const string TerminateOptionListText = Printer.FIRST_LEVEL_INDENT + "--\n" + Printer.SECOND_LEVEL_INDENT + "Terminate option list.";
     }
 }

@@ -75,6 +75,11 @@ namespace OptionLib
         private readonly IList<string> shortNames;
         private readonly IList<string> longNames;
 
+        public bool IsPresent {
+            get;
+            private set;
+        }
+
         public Type GetOptionType() {
             return fieldInfo.FieldType;
         }
@@ -110,6 +115,7 @@ namespace OptionLib
                     return false;
                 }
             }
+            IsPresent = true;
             return true;
         }
 
@@ -120,6 +126,7 @@ namespace OptionLib
             } catch {
                 return false;
             }
+            IsPresent = true;
             return true;
         }
 
