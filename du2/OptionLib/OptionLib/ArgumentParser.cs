@@ -10,16 +10,25 @@ namespace OptionLib
 {
     class ArgumentParser
     {
-        private enum ParserExpectArgumentType
+        private enum ArgumentType
         {
-            ExpectArgType_ANY,
-            ExpectArgType_PARAMETER,
-            ExpectArgType_OPTIONAL_PARAMETER,
+            ANY,
+
+            OPTION,
+            OPTION_SHORT,
+            OPTION_LONG,
+
+            ARGUMENT,
+            ARGUMENT_PARAMETER,
+            ARGUMENT_PARAMETER_OPTIONAL,
+            ARGUMENT_DELIMITER
         }
 
         private TextWriter output;
-        public ArgumentParser(TextWriter output = null)
+        private ProgramOptionsBase programOptions;
+        public ArgumentParser(ProgramOptionsBase programOptions, TextWriter output = null)
         {
+            this.programOptions = programOptions;
             this.output = output;
             if (output == null)
             {
@@ -27,145 +36,259 @@ namespace OptionLib
             }
         }
 
-        private ParserExpectArgumentType nextArg = ParserExpectArgumentType.ExpectArgType_ANY;
-
+        //TODO zbavovat se requiredOptionsListu:!!!
         private List<ProgramOption> requiredOptionsList = new List<ProgramOption>();
-        private SortedDictionary<string, ProgramOption> optionsDictionary = new SortedDictionary<string, ProgramOption>();
-        private List<string> arguments = new List<string>();
+        private Dictionary<string, ProgramOption> optionsDictionary = new Dictionary<string, ProgramOption>();
+        private ProgramOption prevOption = null;
+        private ArgumentType expectedArgType = ArgumentType.ANY;
 
         internal List<string> ParseCommandLine(List<ProgramOption> optionList, string[] args)
         {
-            if (optionList == null)
-            {
-                optionList = new List<ProgramOption>();
-            }
-            ProcessOptions(optionList);
+            /* initialize for new parsing */
+            expectedArgType = ArgumentType.ANY;
+            ProcessOptions(optionList);            
+            List<string> arguments = new List<string>();
             
             for (int argsPosition = 0; argsPosition < args.Length; argsPosition++)
             {
-                /* POZOR POZOR POZOR:
-                 * field values k danym klicum mohou byt promenne majici zatim null hodnotu, takze je treba kontrolovat pomoci
-                 * field.IsDefined()!!!
-                 * 
-                 * field.SetValue(options, parsedvalue);
-                 */
                 string arg = args[argsPosition];
-                switch (nextArg)
+                ArgumentType currentArgType = GetArgumentType(arg);
+                switch (currentArgType)
                 {
-                    case ParserExpectArgumentType.ExpectArgType_ANY:
-                        if (string.IsNullOrEmpty(arg))
-                        {
-                            arguments.Add(arg);
-                        }
-                        else if (arg[0] != '-')
-                        {
-                            arguments.Add(arg);
-                        }
-                        else if (arg == "-")
-                        {
-                            invalidOption("-");
-                        }
-                        else if (arg[1] != '-')
-                        {
-                            ExtractShortOptions(arg);
-                        }
-                        else
-                        {
-                            ExtractLongOptions(args, ref argsPosition);
-                        }
+                    case ArgumentType.ARGUMENT:
+                        ParseArgument(arg, arguments);
                         break;
-                    case ParserExpectArgumentType.ExpectArgType_PARAMETER:
+
+                    case ArgumentType.OPTION_SHORT:
+                        ParseShortOption(arg);
                         break;
-                    case ParserExpectArgumentType.ExpectArgType_OPTIONAL_PARAMETER:
-                        if (arg == "--")
+
+                    case ArgumentType.OPTION_LONG:
+                        bool continueParsing = ParseLongOption(arg);
+                        if (!continueParsing)
                         {
                             arguments.AddRange(args.Skip(argsPosition + 1));
                             argsPosition = args.Length;
                         }
                         break;
+
                     default:
                         throw new NotSupportedException();
                 }
             }
-            log("\nPLAIN ARGUMENTS:");
-            log(string.Join("\n", arguments));
-            return new List<string>(arguments);
+            Log("\nPLAIN ARGUMENTS:");
+            Log(string.Join("\n", arguments));
+            return arguments;// as they are local variable for now (and not private parser field), we dont need to: new List<string>(arguments);
         }
 
         /* reset the options dictionary and refill it with new field information from programoptions options */
         private void ProcessOptions(List<ProgramOption> optionList)
         {
             optionsDictionary.Clear();
-
-            log("POPULATING PARSER DICTIONARY:");
-
-            //FieldInfo[] optionsFields = optionList.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
-            /* Process attributes of every field from users "ProgramOptions" (or whatever class derived from ProgramOptionsBase)
-             * and store settings in dictionary. */
-            //foreach(FieldInfo field in optionsFields)
+            Log("POPULATING PARSER DICTIONARY:");
             foreach(ProgramOption programOption in optionList)
             {
                 AddNamesToDictionary(programOption);
-
                 if (programOption.IsRequired())
                 {
                     requiredOptionsList.Add(programOption);
-                    string name;
-                    if (programOption.LongNames.Count > 0)
-                    {
-                        name = programOption.LongNames[0];
-                    }
-                    /* musi byt alespon jedno kratke jmeno, jinak by AddNamesToDictionary vyhodila vyjimku */
-                    else
-                    {
-                        name = programOption.ShortNames[0];
-                    }
-                    log("Option " + name + " is required.");
+                    Log("Option " + programOption.Name + " is required.");
                 }
             }
         }
 
         private void AddNamesToDictionary(ProgramOption programOption)
         {
-            if (programOption.ShortNames.Count == 0 && programOption.LongNames.Count == 0)
-            {
-                throw new NotSupportedException("Option must have at least one name. Add ShortName and/or LongName attribute.");
-            }
-
             foreach (string name in programOption.ShortNames)
             {
                 optionsDictionary.Add(name, programOption);
-                log("Adding option " + name + " to dictionary.");
+                Log("Adding option " + name + " to dictionary.");
             }
 
             foreach (string name in programOption.LongNames)
             {
                 optionsDictionary.Add(name, programOption);
-                log("Adding option " + name + " to dictionary.");
+                Log("Adding option " + name + " to dictionary.");
             }
         }
 
-        private void ExtractShortOptions(string arg)
+        private ArgumentType GetArgumentType(string arg)
         {
-        }
-
-        private void ExtractLongOptions(string[] args, ref int argsPosition)
-        {
-            string arg = args[argsPosition];
-            if (arg == "--")
+            if (string.IsNullOrEmpty(arg))
             {
-                this.arguments.AddRange(args.Skip(argsPosition + 1));
-                argsPosition = args.Length;
+                return ArgumentType.ARGUMENT;
             }
+            if (arg[0] != '-')
+            {
+                return ArgumentType.ARGUMENT;
+            }
+            /* now arg starts with '-' */
+            if (arg == "-")
+            {
+                return ArgumentType.ARGUMENT;
+            }
+            if (arg[1] != '-')
+            {
+                return ArgumentType.OPTION_SHORT;
+            }
+            return ArgumentType.OPTION_LONG;
+        }
+
+        private void ParseShortOption(string arg)
+        {
+            ProgramOption option = null;
+            switch (expectedArgType)
+            {
+                case ArgumentType.ARGUMENT_PARAMETER_OPTIONAL:
+                    prevOption.SetValueToDefault(programOptions);
+                    goto case ArgumentType.ANY;
+
+                case ArgumentType.ANY:
+                    try
+                    {
+                        option = optionsDictionary[arg.Substring(1)];
+                    }
+                    catch (KeyNotFoundException)
+                    {
+                        LogInvalidArgument(arg);
+                        throw new NotSupportedException("Invalid option -- " + arg.Substring(1));
+                    }
+
+                    /* prepare for parameters? */
+                    if (option.GetOptionAttributeType() == typeof(OptionAttribute))
+                    {
+                        option.SetValue("true", programOptions);
+                        expectedArgType = ArgumentType.ANY;
+                    }
+                    else if (option.GetOptionAttributeType() == typeof(OptionWithOptionableParameterAttribute))
+                    {
+                        expectedArgType = ArgumentType.ARGUMENT_PARAMETER_OPTIONAL;
+                    }
+                    else if (option.GetOptionAttributeType() == typeof(OptionWithParameterAttribute))
+                    {
+                        expectedArgType = ArgumentType.ARGUMENT_PARAMETER;
+                    }
+                    break;
+                
+                /* required option parameter, but short option found => exception */
+                case ArgumentType.ARGUMENT_PARAMETER:
+                    throw new NotSupportedException("Option found, required parameter expected.");
+
+                default:
+                    throw new NotImplementedException("Unknown ArgumentParser.ArgumentType!");
+            }
+            prevOption = option;
+            return;
+        }
+
+        private bool ParseLongOption(string arg)
+        {
+            ProgramOption option = null;
+            switch (expectedArgType)
+            {
+                case ArgumentType.ARGUMENT_PARAMETER_OPTIONAL:
+                    prevOption.SetValueToDefault(programOptions);
+                    goto case ArgumentType.ANY;
+
+                case ArgumentType.ANY:
+                    if (arg == "--")
+                    {
+                        /* finish parsing options and parameters */
+                        return false;
+                    }
+                    int eqPosition = arg.LastIndexOf('=');
+                    try
+                    {
+                        if (eqPosition == -1)
+                        {
+                            option = optionsDictionary[arg.Substring(2)];
+                        }
+                        else
+                        {
+                            option = optionsDictionary[arg.Substring(2, eqPosition - 2)];
+                        }
+                    }
+                    catch (KeyNotFoundException)
+                    {
+                        LogInvalidArgument(arg);
+                        throw new NotSupportedException("Invalid option -- " + arg.Substring(2));
+                    }
+
+                    /* prepare for parameters? */
+                    if (option.GetType() == typeof(OptionAttribute))
+                    {
+                        if (eqPosition != -1)
+                        {
+                            throw new NotSupportedException("Option parameter for option " + option.Name + " disallowed.");
+                        }
+                        option.SetValue("true", programOptions);
+                    }
+                    else if (option.GetType() == typeof(OptionWithOptionableParameterAttribute))
+                    {
+                        if (eqPosition != -1)
+                        {
+                            option.SetValueToDefault(programOptions);
+                        }
+                        else
+                        {
+                            option.SetValue(arg.Substring(eqPosition + 1), programOptions);
+                        }
+                    }
+                    else if (option.GetType() == typeof(OptionWithParameterAttribute))
+                    {
+                        if (eqPosition != -1)
+                        {
+                            throw new NotSupportedException("Required parameter for option " + option.Name + " is missing.");
+                        }
+                        else
+                        {
+                            option.SetValue(arg.Substring(eqPosition + 1), programOptions);
+                        }
+                    }
+                    break;
+
+                /* required option parameter, but short option found => exception */
+                case ArgumentType.ARGUMENT_PARAMETER:
+                    throw new NotSupportedException("Option found, required parameter expected.");
+
+                default:
+                    throw new NotImplementedException("Unknown ArgumentParser.ArgumentType!");
+            }
+            expectedArgType = ArgumentType.ANY;
+            prevOption = option;
+            return true;
+        }
+
+        private void ParseArgument(string arg, List<string> arguments)
+        {
+            switch (expectedArgType)
+            {
+                case ArgumentType.ARGUMENT_PARAMETER:
+                    /* fall through */
+                case ArgumentType.ARGUMENT_PARAMETER_OPTIONAL:
+                    Debug.Assert(prevOption != null, "prevOption parameter is null");
+                    prevOption.SetValue(arg, programOptions);
+                    break;
+
+                case ArgumentType.ARGUMENT:
+                    /* fall through */
+                case ArgumentType.ANY:
+                    arguments.Add(arg);
+                    break;
+                    
+                default:
+                    throw new NotImplementedException("Can't expect any option!");
+            }
+            expectedArgType = ArgumentType.ANY;
         }
 
         [Conditional("DEBUG")]
-        private void log(string msg)
+        private void Log(string msg)
         {
             output.WriteLine(msg);
         }
 
-        private void invalidOption(string option)
+        private void LogInvalidArgument(string option)
         {
             //AssemblyTitleAttribute assemblyTitleAttr = (AssemblyTitleAttribute) Attribute.GetCustomAttribute(programOptions.GetType().Assembly, typeof(AssemblyTitleAttribute));
             //output.WriteLine(assemblyTitleAttr.Title + ": invalid option - " + option);

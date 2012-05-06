@@ -19,42 +19,69 @@ namespace OptionLib
             this.fieldInfo = fieldInfo;
             this.optionAttribute = optionBase;
             if (shortNameAttribute != null) {
-                shortNames = shortNameAttribute.Names;
+                shortNames = shortNameAttribute.Names.AsReadOnly();
             }
             else {
-                shortNames = new List<string>();
+                shortNames = new List<string>().AsReadOnly();
             }
             if (longNameAttribute != null) {
-                longNames = longNameAttribute.Names;
+                longNames = longNameAttribute.Names.AsReadOnly();
             }
             else {
-                longNames = new List<string>();
+                longNames = new List<string>().AsReadOnly();
+            }
+
+            if (longNames.Count == 0 && shortNames.Count == 0)
+            {
+                throw new NotSupportedException("Option must have at least one name. Add ShortName and/or LongName attribute.");
             }
         }
 
-        public List<string> ShortNames {
+        public IList<string> ShortNames {
             get {
                 return shortNames;
             }
         }
 
-        public List<string> LongNames {
+        public IList<string> LongNames {
             get {
                 return longNames;
             }
         }
 
-        private List<string> shortNames;
-        private List<string> longNames;
-
-        public void SetValue(object valueToSet) {
-            if (fieldInfo.FieldType == valueToSet.GetType()) {
-                fieldInfo.SetValue(fieldInfo, valueToSet);
+        public string Name {
+            get {
+                if (longNames.Count > 0)
+                {
+                    return longNames[0];
+                }
+                else
+                {
+                    /* there has to be at least one name, otherwise contructor would fail  */
+                    return shortNames[0];
+                }
             }
         }
 
+        public void SetValueToDefault(ProgramOptionsBase programOptions) {
+            if (optionAttribute.GetType() != typeof(OptionWithParameterAttribute))
+            {
+                throw new NotSupportedException("Option " + optionAttribute.GetType() + " doesn't have any default value.");
+            }
+            /* user has to set DefaultValue in correct type */
+            fieldInfo.SetValue(programOptions, ((OptionWithOptionableParameterAttribute)optionAttribute).DefaultValue);
+        }
+
+        private readonly IList<string> shortNames;
+        private readonly IList<string> longNames;
+
         public Type GetOptionType() {
             return fieldInfo.FieldType;
+        }
+
+        public Type GetOptionAttributeType()
+        {
+            return optionAttribute.GetType();
         }
 
         public bool IsRequired()
@@ -62,7 +89,13 @@ namespace OptionLib
             return optionAttribute.Required;
         }
 
-        private bool SetValue(string textValue, ProgramOptionsBase options) {
+        /* POZOR?
+         * field values k danym klicum mohou byt promenne majici zatim null hodnotu, takze je treba kontrolovat pomoci
+         * field.IsDefined()!!!
+         * 
+         * field.SetValue(options, parsedvalue);
+         */
+        public bool SetValue(string textValue, ProgramOptionsBase options) {
             Type fieldType = fieldInfo.FieldType;
 
             if (fieldType == typeof(string)) {

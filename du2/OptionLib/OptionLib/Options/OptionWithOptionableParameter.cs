@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace OptionLib.Options
+namespace OptionLib
 {
     /// <summary>
     /// Option with voluntary parameter. If the option is not used, value used for initialization (if any) is used. 
