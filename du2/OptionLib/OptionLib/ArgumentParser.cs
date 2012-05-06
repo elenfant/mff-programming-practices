@@ -36,8 +36,6 @@ namespace OptionLib
             }
         }
 
-        //TODO zbavovat se requiredOptionsListu:!!!
-        private List<ProgramOption> requiredOptionsList = new List<ProgramOption>();
         private Dictionary<string, ProgramOption> optionsDictionary = new Dictionary<string, ProgramOption>();
         private ProgramOption prevOption = null;
         private ArgumentType expectedArgType = ArgumentType.ANY;
@@ -89,11 +87,6 @@ namespace OptionLib
             foreach(ProgramOption programOption in optionList)
             {
                 AddNamesToDictionary(programOption);
-                if (programOption.IsRequired())
-                {
-                    requiredOptionsList.Add(programOption);
-                    Log("Option " + programOption.Name + " is required.");
-                }
             }
         }
 

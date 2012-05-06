@@ -63,15 +63,6 @@ namespace OptionLib
             }
         }
 
-        public void SetValueToDefault(ProgramOptionsBase programOptions) {
-            if (optionAttribute.GetType() != typeof(OptionWithParameterAttribute))
-            {
-                throw new NotSupportedException("Option " + optionAttribute.GetType() + " doesn't have any default value.");
-            }
-            /* user has to set DefaultValue in correct type */
-            fieldInfo.SetValue(programOptions, ((OptionWithOptionableParameterAttribute)optionAttribute).DefaultValue);
-        }
-
         private readonly IList<string> shortNames;
         private readonly IList<string> longNames;
 
@@ -129,6 +120,19 @@ namespace OptionLib
             IsPresent = true;
             return true;
         }
+
+        public void SetValueToDefault(ProgramOptionsBase programOptions)
+        {
+            if (optionAttribute.GetType() != typeof(OptionWithParameterAttribute))
+            {
+                throw new NotSupportedException("Option " + optionAttribute.GetType() + " doesn't have any default value.");
+            }
+            /* user has to set DefaultValue in correct type */
+            fieldInfo.SetValue(programOptions, ((OptionWithOptionableParameterAttribute)optionAttribute).DefaultValue);
+            IsPresent = true;
+        }
+
+
 
         public string PrintHelp() {
             return optionAttribute.GetHelpText(shortNames, longNames);
