@@ -4,8 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Reflection;
 using System.Diagnostics;
+using System.IO;
 
-namespace OptionLib.Other
+namespace OptionLib
 {
     class ArgumentParser
     {
@@ -15,16 +16,30 @@ namespace OptionLib.Other
             ExpectArgType_PARAMETER,
             ExpectArgType_OPTIONAL_PARAMETER,
         }
-        
-        private ParserExpectArgumentType nextArg = ParserExpectArgumentType.ExpectArgType_ANY;
-        
-        private SortedDictionary<string, FieldInfo> optionsDictionary = new SortedDictionary<string, FieldInfo>();
 
+        private TextWriter output;
+        public ArgumentParser(TextWriter output = null)
+        {
+            this.output = output;
+            if (output == null)
+            {
+                this.output = System.Console.Out;
+            }
+        }
+
+        private ParserExpectArgumentType nextArg = ParserExpectArgumentType.ExpectArgType_ANY;
+
+        private List<ProgramOption> requiredOptionsList = new List<ProgramOption>();
+        private SortedDictionary<string, ProgramOption> optionsDictionary = new SortedDictionary<string, ProgramOption>();
         private List<string> arguments = new List<string>();
 
-        internal List<string> ProcessCommandLine(ProgramOptionsBase options, string[] args)
+        internal List<string> ParseCommandLine(List<ProgramOption> optionList, string[] args)
         {
-            ProcessOptions(options);
+            if (optionList == null)
+            {
+                optionList = new List<ProgramOption>();
+            }
+            ProcessOptions(optionList);
             
             for (int argsPosition = 0; argsPosition < args.Length; argsPosition++)
             {
@@ -78,35 +93,55 @@ namespace OptionLib.Other
         }
 
         /* reset the options dictionary and refill it with new field information from programoptions options */
-        private void ProcessOptions(ProgramOptionsBase options)
+        private void ProcessOptions(List<ProgramOption> optionList)
         {
             optionsDictionary.Clear();
 
             log("POPULATING PARSER DICTIONARY:");
 
-            FieldInfo[] optionsFields = options.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
+            //FieldInfo[] optionsFields = optionList.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
             /* Process attributes of every field from users "ProgramOptions" (or whatever class derived from ProgramOptionsBase)
              * and store settings in dictionary. */
-            foreach(FieldInfo field in optionsFields)
+            //foreach(FieldInfo field in optionsFields)
+            foreach(ProgramOption programOption in optionList)
             {
-                // TODO predelat na seznamy (kratkych i dlouhych) jmen u atributu, pridavat dvojici (string, field), kde field bude sdilene
-                // jsou shortname a longname povinne? nebude stacit mit alespon jeden z nich?
-                // v tom pripade je treba kontrolovat na shortName != null apod pro longName
-                ShortNameAttribute shortName = (ShortNameAttribute)Attribute.GetCustomAttribute(field, typeof(ShortNameAttribute));
-                optionsDictionary.Add(shortName.ShortName, field);
-                log("Adding option " + shortName.ShortName + " to dictionary.");
+                AddNamesToDictionary(programOption);
 
-                LongNameAttribute longName = (LongNameAttribute)Attribute.GetCustomAttribute(field, typeof(LongNameAttribute));
-                optionsDictionary.Add(longName.LongName, field);
-                log("Adding option " + longName.LongName + " to dictionary.");
-
-                // TODO upravit podle toho, ve kterem atributu bude required, ale u jinych voleb to nema moc smysl
-                OptionWithParameterAttribute option = (OptionWithParameterAttribute)Attribute.GetCustomAttribute(field, typeof(OptionWithParameterAttribute), true);
-                if (option != null && option.isRequired())
+                if (programOption.IsRequired())
                 {
-                    options.AddRequiredOption(option);
+                    requiredOptionsList.Add(programOption);
+                    string name;
+                    if (programOption.LongNames.Count > 0)
+                    {
+                        name = programOption.LongNames[0];
+                    }
+                    /* musi byt alespon jedno kratke jmeno, jinak by AddNamesToDictionary vyhodila vyjimku */
+                    else
+                    {
+                        name = programOption.ShortNames[0];
+                    }
+                    log("Option " + name + " is required.");
                 }
-                log("Option " + option + " is required.");
+            }
+        }
+
+        private void AddNamesToDictionary(ProgramOption programOption)
+        {
+            if (programOption.ShortNames.Count == 0 && programOption.LongNames.Count == 0)
+            {
+                throw new NotSupportedException("Option must have at least one name. Add ShortName and/or LongName attribute.");
+            }
+
+            foreach (string name in programOption.ShortNames)
+            {
+                optionsDictionary.Add(name, programOption);
+                log("Adding option " + name + " to dictionary.");
+            }
+
+            foreach (string name in programOption.LongNames)
+            {
+                optionsDictionary.Add(name, programOption);
+                log("Adding option " + name + " to dictionary.");
             }
         }
 
@@ -127,12 +162,14 @@ namespace OptionLib.Other
         [Conditional("DEBUG")]
         private void log(string msg)
         {
-            System.Console.WriteLine(msg);
+            output.WriteLine(msg);
         }
 
         private void invalidOption(string option)
         {
-            System.Console.WriteLine("invalid option: " + option);
+            //AssemblyTitleAttribute assemblyTitleAttr = (AssemblyTitleAttribute) Attribute.GetCustomAttribute(programOptions.GetType().Assembly, typeof(AssemblyTitleAttribute));
+            //output.WriteLine(assemblyTitleAttr.Title + ": invalid option - " + option);
+            output.WriteLine("invalid option - " + option);
         }
     }
 

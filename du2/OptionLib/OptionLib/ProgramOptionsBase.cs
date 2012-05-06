@@ -51,7 +51,8 @@ namespace OptionLib
                 optionList.Add(option);
             }
 
-            //vytvorim parser a zavolam na nem Parse(optionList, args);
+            ArgumentParser argParser = new ArgumentParser();
+            arguments.Concat(argParser.ParseCommandLine(optionList, args));
         }
     }
 }
