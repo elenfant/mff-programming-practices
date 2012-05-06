@@ -10,6 +10,11 @@ namespace Test
 {
     class ProgramOptions : ProgramOptionsBase
     {
+        [OptionWithOptionableParameter(1, Description = "Den v roce, den odletu.", ParameterName = "DEN")]
+        [ShortName("d"), LongName("day")]
+        [BoundsAttribute(LowerBound = 1, UpperBound = 12)]
+        public int day = -1;
+
         [Option(Description = "(Used together with -o.) Do not overwrite but append.")]
         [ShortName("a", "b", "c")]
         [LongName("append", "blend", "create")]
@@ -44,12 +49,11 @@ namespace Test
         }
     }
 
-
     class Program
     {
         static void Main(string[] args) {
             ProgramOptions options = new ProgramOptions();
-            options.Initialize(args);
+            options.Initialize(new string[] { "-v", "-o", "/path/to/file", "-a", "-d", "5", "--", "--some--", "useless", "noise" });
             options.PrintHelp();
             options.PrintVersion();
         }

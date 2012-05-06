@@ -99,12 +99,17 @@ namespace OptionLib
             } else if (fieldInfo.FieldType.IsEnum) {
                 return SetEnumValue(textValue, options);
             } else {
+                object value = null;
                 try {
-                    object value = TypeDescriptor.GetConverter(fieldType).ConvertFromString(textValue);
-                    fieldInfo.SetValue(options, value);
+                    value = TypeDescriptor.GetConverter(fieldType).ConvertFromString(textValue);
                 } catch (NotSupportedException) {
                     return false;
                 }
+                if (fieldType == typeof(int))
+                {
+                    BoundsCheck((int)value);
+                }
+                fieldInfo.SetValue(options, value);
             }
             IsPresent = true;
             return true;
@@ -132,7 +137,23 @@ namespace OptionLib
             IsPresent = true;
         }
 
+        private void BoundsCheck(int value)
+        {
+            BoundsAttribute bounds = (BoundsAttribute)Attribute.GetCustomAttribute(fieldInfo, typeof(BoundsAttribute));
+            if (bounds == null)
+            {
+                return;
+            }
+            if (value < bounds.LowerBound)
+            {
+                throw new NotSupportedException("Value of option " + Name + " must be greater than or equal to " + bounds.LowerBound + ". Smaller value (" + value + ") provided.");
+            }
+            if (value > bounds.UpperBound)
+            {
+                throw new NotSupportedException("Value of option " + Name + " must be smaller than or equal to " + bounds.UpperBound + ". Greater value (" + value + ") provided.");
+            }
 
+        }
 
         public string PrintHelp() {
             return optionAttribute.GetHelpText(shortNames, longNames);
