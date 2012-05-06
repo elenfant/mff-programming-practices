@@ -16,8 +16,8 @@ namespace Test
         public int day = -1;
 
         [Option(Description = "(Used together with -o.) Do not overwrite but append.")]
-        [ShortName("a", "b", "c")]
-        [LongName("append", "blend", "create")]
+        [ShortName("a", "c")]
+        [LongName("append", "create")]
         public bool append = false;
 
         [Option(Description = "Use the portable output format.")]
@@ -38,11 +38,15 @@ namespace Test
         //[LongName("verbose")]
         public bool verbose = false;
 
-        public override string GetProgramHelpText() {
+        [OptionWithOptionableParameter(256, Description = "Use block output, voluntary SIZE specifies its size.", ParameterName = "SIZE")]
+        [ShortName("b"), LongName("use-block-output")]
+        public int blockSize = 1;
+
+        protected override string GetProgramHelpText() {
             return "time [options] command [arguments...]";
         }
 
-        public override string GetVersionInformation() {
+        protected override string GetVersionInformation() {
             AssemblyName assemblyName = Assembly.GetEntryAssembly().GetName();
             Version version = assemblyName.Version;
             return String.Format("AssemblyName: {0}, Version: {1}", assemblyName.Name, version.ToString());
@@ -55,7 +59,6 @@ namespace Test
             ProgramOptions options = new ProgramOptions();
             options.Initialize(new string[] { "-v", "-o", "/path/to/file", "-a", "-d", "5", "--", "--some--", "useless", "noise" });
             options.PrintHelp();
-            options.PrintVersion();
         }
     }
 }

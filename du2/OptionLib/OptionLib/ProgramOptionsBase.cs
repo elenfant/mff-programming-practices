@@ -55,7 +55,7 @@ namespace OptionLib
             }
 
             ArgumentParser argParser = new ArgumentParser(this);
-            arguments.Concat(argParser.ParseCommandLine(optionList, args));
+            arguments.AddRange(argParser.ParseCommandLine(optionList, args));
             CheckRequiredOptions();
         }
 
@@ -75,13 +75,13 @@ namespace OptionLib
             }
         }
 
-        public abstract string GetProgramHelpText();
+        protected abstract string GetProgramHelpText();
 
         public void PrintVersion() {
             Console.WriteLine(GetVersionInformation());
         }
 
-        public abstract string GetVersionInformation();
+        protected abstract string GetVersionInformation();
 
         private const string TerminateOptionListText = Printer.FIRST_LEVEL_INDENT + "--\n" + Printer.SECOND_LEVEL_INDENT + "Terminate option list.";
     }

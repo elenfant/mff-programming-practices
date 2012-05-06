@@ -31,11 +31,11 @@ namespace UseCases
         [LongName("verbose")]
         public bool verbose = false;
 
-        public override string GetProgramHelpText() {
+        protected override string GetProgramHelpText() {
             return "time [options] command [arguments...]";
         }
 
-        public override string GetVersionInformation() {
+        protected override string GetVersionInformation() {
             AssemblyName assemblyName = Assembly.GetEntryAssembly().GetName();
             Version version = assemblyName.Version;
             return String.Format("AssemblyName: {0}, Version: {1}", assemblyName.Name, version.ToString());
@@ -66,7 +66,7 @@ namespace UseCases
             }
 
             System.IO.StreamWriter writer = null;
-            if (options.outputFile != null) {
+            if (options.outputFile != null && System.IO.File.Exists(options.outputFile)) {
                 var fileStream = new System.IO.FileStream(options.outputFile, options.append ? System.IO.FileMode.Append : System.IO.FileMode.OpenOrCreate, System.IO.FileAccess.Write);
                 writer = new System.IO.StreamWriter(fileStream);
                 if (options.verbose) {
@@ -98,7 +98,7 @@ namespace UseCases
 
         private static bool RunAndTimeProgram(string commandName, System.Collections.Generic.List<string> list, System.IO.StreamWriter outputStream = null, string format = null) {
 
-            throw new NotImplementedException();
+            return true;
         }
     }
 }

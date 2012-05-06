@@ -43,7 +43,6 @@
     <Compile Include="ArgumentParser.cs" />
     <Compile Include="Options\BoundsAttribute.cs" />
     <Compile Include="Options\OptionBase.cs" />
-    <Compile Include="Options\FormatedHelpText.cs" />
     <Compile Include="Options\LongName.cs" />
     <Compile Include="Options\NameAttribute.cs" />
     <Compile Include="Options\Option.cs" />
