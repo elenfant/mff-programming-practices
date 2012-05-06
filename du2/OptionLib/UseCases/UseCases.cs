@@ -15,12 +15,12 @@ namespace UseCases
         [LongName("portability")]
         public bool portability = false;
 
-        [OptionWithParameter("f", "format", "Specify output format, possibly overriding the format specified in the environment variable TIME.")]
+        [OptionWithParameter("Specify output format, possibly overriding the format specified in the environment variable TIME.", "FORMAT", true)]
         [ShortName("f")]
         [LongName("format")]
         public string format = null;
 
-        [OptionWithParameter("o", "output", "Do not send the results to stderr, but overwrite the specified file.", "FILE")]
+        [OptionWithParameter("Do not send the results to stderr, but overwrite the specified file.", "FILE", false)]
         [ShortName("o")]
         [LongName("output")]
         public string outputFile = null;
@@ -39,10 +39,17 @@ namespace UseCases
 
     class UseCases
     {
-        static void Main(string[] args)
+        static void Main()
+        {
+            time();
+        }
+
+        private static void time()
         {
             TimeOptions options = new TimeOptions();
-            options.Initialize(args);
+            string[] timeArgs = new string[] { "-v", "-o", "/path/to/file", "-a", "--", "--some--", "useless", "noise" };
+            options.Initialize(timeArgs);
+            /* TimeOptions processing to be added */
         }
     }
 }

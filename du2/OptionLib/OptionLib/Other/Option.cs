@@ -7,13 +7,7 @@ namespace OptionLib.Other
 {
     public class OptionAttribute : OptionBase
     {
-        protected string description;
-        public string Description
-        {
-            get { return description; }
-        }
-
-        public OptionAttribute(string description, bool required = false)
+        public OptionAttribute(string description)
         {
             this.description = description;
         }

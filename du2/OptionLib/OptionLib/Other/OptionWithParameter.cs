@@ -7,9 +7,15 @@ namespace OptionLib.Other
 {
     public class OptionWithParameterAttribute : OptionBase
     {
-        public OptionWithParameterAttribute(string shortName, string longName, string description, string parameterName = "PAR", bool required = false)
+        protected bool parameterRequired;
+        public bool ParameterRequired
         {
- 
+            get { return parameterRequired; }
+        }
+
+        public OptionWithParameterAttribute(string description, string parameterName = "PAR", bool required = false)
+        {
+            this.parameterRequired = required;
         }
     }
 }

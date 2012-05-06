@@ -8,7 +8,12 @@ namespace OptionLib
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
     public class OptionBase : Attribute
     {
-        
+        protected string description;
+        public string Description
+        {
+            get { return description; }
+        }
+
     }
 
     /* docasne reseni i umisteni, jen pro alespon minimalni testovaci ucely */
