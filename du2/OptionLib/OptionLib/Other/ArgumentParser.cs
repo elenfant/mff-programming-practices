@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Reflection;
 using System.Diagnostics;
+using System.IO;
 
 namespace OptionLib.Other
 {
@@ -15,16 +16,37 @@ namespace OptionLib.Other
             ExpectArgType_PARAMETER,
             ExpectArgType_OPTIONAL_PARAMETER,
         }
-        
+
+        public ArgumentParser(TextWriter output = null)
+        {
+            this.output = output;
+            if (output == null)
+            {
+                this.output = System.Console.Out;
+            }
+        }
+
+        private TextWriter output;
         private ParserExpectArgumentType nextArg = ParserExpectArgumentType.ExpectArgType_ANY;
         
         private SortedDictionary<string, FieldInfo> optionsDictionary = new SortedDictionary<string, FieldInfo>();
 
+        // TODO move arguments as local variable inside the ProcessCommandLine method
         private List<string> arguments = new List<string>();
+
+        private ProgramOptionsBase programOptions = null;
 
         internal List<string> ProcessCommandLine(ProgramOptionsBase options, string[] args)
         {
-            ProcessOptions(options);
+            if (options == null)
+            {
+                programOptions = new ProgramOptionsBase();
+            }
+            else
+            {
+                programOptions = options;
+            }
+            ProcessOptions();
             
             for (int argsPosition = 0; argsPosition < args.Length; argsPosition++)
             {
@@ -78,13 +100,13 @@ namespace OptionLib.Other
         }
 
         /* reset the options dictionary and refill it with new field information from programoptions options */
-        private void ProcessOptions(ProgramOptionsBase options)
+        private void ProcessOptions()
         {
             optionsDictionary.Clear();
 
             log("POPULATING PARSER DICTIONARY:");
 
-            FieldInfo[] optionsFields = options.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
+            FieldInfo[] optionsFields = programOptions.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
             /* Process attributes of every field from users "ProgramOptions" (or whatever class derived from ProgramOptionsBase)
              * and store settings in dictionary. */
             foreach(FieldInfo field in optionsFields)
@@ -104,9 +126,9 @@ namespace OptionLib.Other
                 OptionWithParameterAttribute option = (OptionWithParameterAttribute)Attribute.GetCustomAttribute(field, typeof(OptionWithParameterAttribute), true);
                 if (option != null && option.isRequired())
                 {
-                    options.AddRequiredOption(option);
+                    programOptions.AddRequiredOption(option);
+                    log("Option " + option.ParameterName + " is required.");
                 }
-                log("Option " + option + " is required.");
             }
         }
 
@@ -127,12 +149,13 @@ namespace OptionLib.Other
         [Conditional("DEBUG")]
         private void log(string msg)
         {
-            System.Console.WriteLine(msg);
+            output.WriteLine(msg);
         }
 
         private void invalidOption(string option)
         {
-            System.Console.WriteLine("invalid option: " + option);
+            AssemblyTitleAttribute assemblyTitleAttr = (AssemblyTitleAttribute) Attribute.GetCustomAttribute(programOptions.GetType().Assembly, typeof(AssemblyTitleAttribute));
+            output.WriteLine(assemblyTitleAttr.Title + ": invalid option - " + option);
         }
     }
 
