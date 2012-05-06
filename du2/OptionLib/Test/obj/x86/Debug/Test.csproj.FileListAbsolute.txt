@@ -1,7 +1,0 @@
-C:\Users\Bogo\mff-programming-practices\du2\OptionLib\Test\obj\x86\Debug\ResolveAssemblyReference.cache
-C:\Users\Bogo\mff-programming-practices\du2\OptionLib\Test\bin\Debug\Test.exe
-C:\Users\Bogo\mff-programming-practices\du2\OptionLib\Test\bin\Debug\Test.pdb
-C:\Users\Bogo\mff-programming-practices\du2\OptionLib\Test\bin\Debug\OptionLib.dll
-C:\Users\Bogo\mff-programming-practices\du2\OptionLib\Test\bin\Debug\OptionLib.pdb
-C:\Users\Bogo\mff-programming-practices\du2\OptionLib\Test\obj\x86\Debug\Test.exe
-C:\Users\Bogo\mff-programming-practices\du2\OptionLib\Test\obj\x86\Debug\Test.pdb

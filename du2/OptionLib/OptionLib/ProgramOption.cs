@@ -62,6 +62,11 @@ namespace OptionLib
             return fieldInfo.FieldType;
         }
 
+        public bool IsRequired()
+        {
+            return optionAttribute.Required;
+        }
+
         private bool SetValue(string textValue, ProgramOptionsBase options) {
             Type fieldType = fieldInfo.FieldType;
 
