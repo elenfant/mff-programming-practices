@@ -8,7 +8,6 @@ using System.Reflection;
 
 namespace Test
 {
-    //[FormatedHelpText("Print a usage message on standard output and exit successfully.")]
     class ProgramOptions : ProgramOptionsBase
     {
         [Option(Description = "(Used together with -o.) Do not overwrite but append.")]
@@ -25,7 +24,7 @@ namespace Test
         [LongName("format")]
         public string format = null;
 
-        [OptionWithParameter(Description = "Do not send the results to stderr, but overwrite the specified file.", ParameterName = "FILE")]
+        [OptionWithParameter(Description = "Do not send the results to stderr, but overwrite the specified file.")]
         [ShortName("o"), LongName("output")]
         public string outputFile = null;
 
@@ -34,10 +33,8 @@ namespace Test
         //[LongName("verbose")]
         public bool verbose = false;
 
-        public override string ProgramHelpText {
-            get {
-                return "time [options] command [arguments...]";
-            }
+        public override string GetProgramHelpText() {
+            return "time [options] command [arguments...]";
         }
 
         public override string GetVersionInformation() {
@@ -45,13 +42,6 @@ namespace Test
             Version version = assemblyName.Version;
             return String.Format("AssemblyName: {0}, Version: {1}", assemblyName.Name, version.ToString());
         }
-        
-
-        //[FormatedHelpText("Print a usage message on standard output and exit successfully.")]
-
-        //example of multiple names for option
-        //[Option(description: "Blabla description", ShortNames = new string[] { "c", "m", "s" }, LongNames = new List<string> {"copy", "move", "send"})]
-        //public bool copy = false;
     }
 
 

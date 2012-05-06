@@ -26,7 +26,7 @@ namespace OptionLib
         /// Prints program help and description of all defined options
         /// </summary>
         public void PrintHelp() {
-            Console.WriteLine(ProgramHelpText);
+            Console.WriteLine(GetProgramHelpText());
             foreach (ProgramOption option in optionList) {
                 Console.WriteLine(option.PrintHelp());
             }
@@ -68,15 +68,13 @@ namespace OptionLib
 
         private void CheckRequiredOptions() {
             foreach (var option in optionList) {
-                if (option.IsRequired && !option.IsPresent) {
+                if (option.IsRequired() && !option.IsPresent) {
                 //TODO: Required option is not present!
                 }
             }
         }
 
-        public abstract string ProgramHelpText {
-            get;
-        }
+        public abstract string GetProgramHelpText();
 
         public void PrintVersion() {
             Console.WriteLine(GetVersionInformation());

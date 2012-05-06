@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace OptionLib.Options
+namespace OptionLib
 {
     /// <summary>
     /// Option with voluntary parameter. If the option is not used, value used for initialization (if any) is used. 
@@ -27,8 +27,8 @@ namespace OptionLib.Options
 
             protected override string GetHelpTextForName(string name, NameType type) {
                 switch (type) {
-                    case NameType.Short: return string.Format("-{0}[ {1}]", name, ParameterName);
-                    case NameType.Long: return string.Format("--{0}[={1}]", name, ParameterName);
+                    case NameType.Short: return string.Format("-{0}[ {1}]", name, Printer.GetParameterName(ParameterName));
+                    case NameType.Long: return string.Format("--{0}[={1}]", name, Printer.GetParameterName(ParameterName));
                     default: throw new NotImplementedException();
                 }
             }

@@ -44,12 +44,6 @@ namespace OptionLib
             }
         }
 
-        public bool IsRequired {
-            get {
-                return optionAttribute.Required;
-            }
-        }
-
         public bool IsPresent {
             get;
             private set;
