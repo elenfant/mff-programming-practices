@@ -44,14 +44,19 @@ namespace OptionLib
             }
         }
 
-        private List<string> shortNames;
-        private List<string> longNames;
-
-        public void SetValue(object valueToSet) {
-            if (fieldInfo.FieldType == valueToSet.GetType()) {
-                fieldInfo.SetValue(fieldInfo, valueToSet);
+        public bool IsRequired {
+            get {
+                return optionAttribute.Required;
             }
         }
+
+        public bool IsPresent {
+            get;
+            private set;
+        }
+
+        private List<string> shortNames;
+        private List<string> longNames;
 
         public Type GetOptionType() {
             return fieldInfo.FieldType;
@@ -72,6 +77,7 @@ namespace OptionLib
                     return false;
                 }
             }
+            IsPresent = true;
             return true;
         }
 
@@ -82,6 +88,7 @@ namespace OptionLib
             } catch {
                 return false;
             }
+            IsPresent = true;
             return true;
         }
 

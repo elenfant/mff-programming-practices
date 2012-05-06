@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using OptionLib;
 using Test;
+using System.Reflection;
 
 namespace Test
 {
@@ -33,6 +34,19 @@ namespace Test
         //[LongName("verbose")]
         public bool verbose = false;
 
+        public override string ProgramHelpText {
+            get {
+                return "time [options] command [arguments...]";
+            }
+        }
+
+        public override string GetVersionInformation() {
+            AssemblyName assemblyName = Assembly.GetEntryAssembly().GetName();
+            Version version = assemblyName.Version;
+            return String.Format("AssemblyName: {0}, Version: {1}", assemblyName.Name, version.ToString());
+        }
+        
+
         //[FormatedHelpText("Print a usage message on standard output and exit successfully.")]
 
         //example of multiple names for option
@@ -47,6 +61,7 @@ namespace Test
             ProgramOptions options = new ProgramOptions();
             options.Initialize(args);
             options.PrintHelp();
+            options.PrintVersion();
         }
     }
 }
