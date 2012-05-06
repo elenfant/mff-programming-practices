@@ -85,12 +85,12 @@ namespace OptionLib
             return optionAttribute.Required;
         }
 
-        /* POZOR?
-         * field values k danym klicum mohou byt promenne majici zatim null hodnotu, takze je treba kontrolovat pomoci
-         * field.IsDefined()!!!
-         * 
-         * field.SetValue(options, parsedvalue);
-         */
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="textValue"></param>
+        /// <param name="options"></param>
+        /// <returns></returns>
         public bool SetValue(string textValue, ProgramOptionsBase options) {
             Type fieldType = fieldInfo.FieldType;
 

@@ -11,8 +11,8 @@ namespace Test
     class ProgramOptions : ProgramOptionsBase
     {
         [Option(Description = "(Used together with -o.) Do not overwrite but append.")]
-        [ShortName("a", "b", "c")]
-        [LongName("append", "blend", "create")]
+        [ShortName("a", "c")]
+        [LongName("append", "create")]
         public bool append = false;
 
         [Option(Description = "Use the portable output format.")]

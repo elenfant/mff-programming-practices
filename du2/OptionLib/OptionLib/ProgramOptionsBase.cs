@@ -55,7 +55,7 @@ namespace OptionLib
             }
 
             ArgumentParser argParser = new ArgumentParser(this);
-            arguments.Concat(argParser.ParseCommandLine(optionList, args));
+            arguments.AddRange(argParser.ParseCommandLine(optionList, args));
             CheckRequiredOptions();
         }
 

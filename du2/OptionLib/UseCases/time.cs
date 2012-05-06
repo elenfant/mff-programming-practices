@@ -66,7 +66,7 @@ namespace UseCases
             }
 
             System.IO.StreamWriter writer = null;
-            if (options.outputFile != null) {
+            if (options.outputFile != null && System.IO.File.Exists(options.outputFile)) {
                 var fileStream = new System.IO.FileStream(options.outputFile, options.append ? System.IO.FileMode.Append : System.IO.FileMode.OpenOrCreate, System.IO.FileAccess.Write);
                 writer = new System.IO.StreamWriter(fileStream);
                 if (options.verbose) {
@@ -98,7 +98,7 @@ namespace UseCases
 
         private static bool RunAndTimeProgram(string commandName, System.Collections.Generic.List<string> list, System.IO.StreamWriter outputStream = null, string format = null) {
 
-            throw new NotImplementedException();
+            return true;
         }
     }
 }
