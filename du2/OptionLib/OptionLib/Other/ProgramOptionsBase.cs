@@ -7,15 +7,18 @@ namespace OptionLib.Other
 {
     public class ProgramOptionsBase
     {
-        internal const string argumentsVariableName = "arguments";
         public List<string> arguments = new List<string>();
-
-        internal const string parserVariableName = "parser";
         private ArgumentParser parser = new ArgumentParser();
+        private SortedSet<OptionBase> requiredOptions = new SortedSet<OptionBase>();
 
         public void Initialize(string[] args)
         {
             arguments = parser.ProcessCommandLine(this, args);
+        }
+
+        public void AddRequiredOption(OptionBase option)
+        {
+            requiredOptions.Add(option);
         }
     }
 }

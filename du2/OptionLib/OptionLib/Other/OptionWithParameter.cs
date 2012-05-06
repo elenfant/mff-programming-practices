@@ -8,9 +8,10 @@ namespace OptionLib.Other
     public class OptionWithParameterAttribute : OptionBase
     {
         protected bool parameterRequired;
-        public bool ParameterRequired
+
+        public bool isRequired()
         {
-            get { return parameterRequired; }
+            return parameterRequired;
         }
 
         public OptionWithParameterAttribute(string description, string parameterName = "PAR", bool required = false)

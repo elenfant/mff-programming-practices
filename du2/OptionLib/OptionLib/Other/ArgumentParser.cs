@@ -15,9 +15,12 @@ namespace OptionLib.Other
             ExpectArgType_PARAMETER,
             ExpectArgType_OPTIONAL_PARAMETER,
         }
+        
         private ParserExpectArgumentType nextArg = ParserExpectArgumentType.ExpectArgType_ANY;
+        
         private SortedDictionary<string, FieldInfo> optionsDictionary = new SortedDictionary<string, FieldInfo>();
-        List<string> arguments = new List<string>();
+
+        private List<string> arguments = new List<string>();
 
         internal List<string> ProcessCommandLine(ProgramOptionsBase options, string[] args)
         {
@@ -81,17 +84,14 @@ namespace OptionLib.Other
 
             log("POPULATING PARSER DICTIONARY:");
 
-            FieldInfo[] optionsFields = options.GetType().GetFields();
+            FieldInfo[] optionsFields = options.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
             /* Process attributes of every field from users "ProgramOptions" (or whatever class derived from ProgramOptionsBase)
-             * and store settings in dictionary. Skip parser and arguments fields". */
+             * and store settings in dictionary. */
             foreach(FieldInfo field in optionsFields)
             {
-                if (field.Name == ProgramOptionsBase.parserVariableName || field.Name == ProgramOptionsBase.argumentsVariableName)
-                {
-                    continue;
-                }
-                
-                // TODO predelat na seznamy (kratkych i dlouhych) jmen u atributu, pridat dvojici (string, field), kde field bude sdilene
+                // TODO predelat na seznamy (kratkych i dlouhych) jmen u atributu, pridavat dvojici (string, field), kde field bude sdilene
+                // jsou shortname a longname povinne? nebude stacit mit alespon jeden z nich?
+                // v tom pripade je treba kontrolovat na shortName != null apod pro longName
                 ShortNameAttribute shortName = (ShortNameAttribute)Attribute.GetCustomAttribute(field, typeof(ShortNameAttribute));
                 optionsDictionary.Add(shortName.ShortName, field);
                 log("Adding option " + shortName.ShortName + " to dictionary.");
@@ -102,6 +102,11 @@ namespace OptionLib.Other
 
                 // TODO upravit podle toho, ve kterem atributu bude required, ale u jinych voleb to nema moc smysl
                 OptionWithParameterAttribute option = (OptionWithParameterAttribute)Attribute.GetCustomAttribute(field, typeof(OptionWithParameterAttribute), true);
+                if (option != null && option.isRequired())
+                {
+                    options.AddRequiredOption(option);
+                }
+                log("Option " + option + " is required.");
             }
         }
 
