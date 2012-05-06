@@ -61,6 +61,12 @@ namespace OptionLib
             return optionAttribute.Required;
         }
 
+        /// <summary>
+        /// Sets value to corresponding option. Parser string representation and sets it to corresponding variable
+        /// </summary>
+        /// <param name="textValue">Value in string representation</param>
+        /// <param name="options">Options object to set value on</param>
+        /// <returns></returns>
         private bool SetValue(string textValue, ProgramOptionsBase options) {
             Type fieldType = fieldInfo.FieldType;
 
@@ -80,6 +86,12 @@ namespace OptionLib
             return true;
         }
 
+        /// <summary>
+        /// Parses and sets Enum value to option.
+        /// </summary>
+        /// <param name="textValue">Value in string representation</param>
+        /// <param name="options">Options object to set value on</param>
+        /// <returns></returns>
         private bool SetEnumValue(string textValue, ProgramOptionsBase options) {
             try {
                 var value = Enum.Parse(fieldInfo.FieldType, textValue, true);
@@ -91,6 +103,10 @@ namespace OptionLib
             return true;
         }
 
+        /// <summary>
+        /// Prints description of option.
+        /// </summary>
+        /// <returns>Formatted description</returns>
         public string PrintHelp() {
             return optionAttribute.GetHelpText(shortNames, longNames);
         }

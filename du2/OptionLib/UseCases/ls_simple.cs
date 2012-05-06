@@ -28,11 +28,11 @@ namespace UseCases
         [LongName("quoting-style")]
         public QuotingStyle quotingStyle = QuotingStyle.shell;
 
-        public override string GetProgramHelpText() {
+        protected override string GetProgramHelpText() {
             return "ls - list directory contents\nls [OPTION]... [FILE]...";
         }
 
-        public override string GetVersionInformation() {
+        protected override string GetVersionInformation() {
             return "Simple version of ls.";
         }
 
@@ -56,7 +56,7 @@ namespace UseCases
         private static void ls(string[] args) {
             LsOptions options = new LsOptions();
             options.Initialize(args);
-
+            
             ListDirectoryContents(options);
         }
 

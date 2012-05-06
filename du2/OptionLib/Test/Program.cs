@@ -33,11 +33,15 @@ namespace Test
         //[LongName("verbose")]
         public bool verbose = false;
 
-        public override string GetProgramHelpText() {
+        [OptionWithOptionableParameter(256, Description = "Use block output, voluntary SIZE specifies its size.", ParameterName = "SIZE")]
+        [ShortName("b"), LongName("use-block-output")]
+        public int blockSize = 1;
+
+        protected override string GetProgramHelpText() {
             return "time [options] command [arguments...]";
         }
 
-        public override string GetVersionInformation() {
+        protected override string GetVersionInformation() {
             AssemblyName assemblyName = Assembly.GetEntryAssembly().GetName();
             Version version = assemblyName.Version;
             return String.Format("AssemblyName: {0}, Version: {1}", assemblyName.Name, version.ToString());
@@ -51,7 +55,6 @@ namespace Test
             ProgramOptions options = new ProgramOptions();
             options.Initialize(args);
             options.PrintHelp();
-            options.PrintVersion();
         }
     }
 }

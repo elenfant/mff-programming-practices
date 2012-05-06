@@ -31,11 +31,11 @@ namespace UseCases
         [LongName("verbose")]
         public bool verbose = false;
 
-        public override string GetProgramHelpText() {
+        protected override string GetProgramHelpText() {
             return "time [options] command [arguments...]";
         }
 
-        public override string GetVersionInformation() {
+        protected override string GetVersionInformation() {
             AssemblyName assemblyName = Assembly.GetEntryAssembly().GetName();
             Version version = assemblyName.Version;
             return String.Format("AssemblyName: {0}, Version: {1}", assemblyName.Name, version.ToString());

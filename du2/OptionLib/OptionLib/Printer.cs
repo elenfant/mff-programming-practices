@@ -7,10 +7,26 @@ namespace OptionLib
 {
     class Printer
     {
+        /// <summary>
+        /// Default parameter name for printing help
+        /// </summary>
         public const string DEFAULT_PARAMETER_NAME = "ARG";
+        /// <summary>
+        /// First level indent in help text.
+        /// </summary>
         public const string FIRST_LEVEL_INDENT = "    ";
+        /// <summary>
+        /// Second level indent in help text.
+        /// </summary>
         public const string SECOND_LEVEL_INDENT = "        ";
 
+        /// <summary>
+        /// Formates text for printing. Just simple line breaking and indentation.
+        /// </summary>
+        /// <param name="text">Text to format</param>
+        /// <param name="indent">Indent used on each line</param>
+        /// <param name="width">Width to format to</param>
+        /// <returns></returns>
         public static string FormatTextToPrint(string text, string indent, int width) {
             StringBuilder formattedText = new StringBuilder();
             int lineLength = 0;
@@ -59,7 +75,11 @@ namespace OptionLib
             return formattedText.ToString();
         }
 
-
+        /// <summary>
+        /// Checks if ParameterName was entered, if not, returns default name.
+        /// </summary>
+        /// <param name="parameterName">Name of parameter</param>
+        /// <returns></returns>
         public static string GetParameterName(string parameterName) {
             return parameterName != null ? parameterName : DEFAULT_PARAMETER_NAME;
         }
