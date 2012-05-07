@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Reflection;
 
 namespace OptionLib
 {
@@ -11,7 +12,6 @@ namespace OptionLib
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
     public abstract class OptionBase : Attribute
     {
-        public OptionBase() { }
 
         /// <summary>
         /// Description of option, printed in help.
@@ -62,7 +62,7 @@ namespace OptionLib
             if (Required) {
                 helpText.AppendLine(Printer.FormatTextToPrint("This option is required.", Printer.SECOND_LEVEL_INDENT, Console.WindowWidth));
             }
-            
+
             helpText.Append(Printer.FormatTextToPrint(Description, Printer.SECOND_LEVEL_INDENT, Console.WindowWidth));
             return helpText.ToString();
         }
@@ -75,18 +75,28 @@ namespace OptionLib
         /// <returns>Help string for given option.</returns>
         /// <seealso cref="NameType" />
         /// <example><para><c>-f</c> is short option string</para><para><c>--format</c> is long option string</para></example>
-        protected virtual string GetHelpTextForName(string name, NameType type)
-        {
+        protected virtual string GetHelpTextForName(string name, NameType type) {
             switch (type) {
                 case NameType.Short: return string.Format("-{0}", name);
                 case NameType.Long: return string.Format("--{0}", name);
                 default: throw new NotImplementedException();
             }
         }
+
     }
 
     /// <summary>
     /// Types of names for options.
     /// </summary>
-    public enum NameType { Short, Long }
+    public enum NameType
+    {
+        /// <summary>
+        /// Short name for option. Typically one char.
+        /// </summary>
+        Short,
+        /// <summary>
+        /// Long name for option.
+        /// </summary>
+        Long
+    }
 }

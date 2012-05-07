@@ -10,6 +10,9 @@ namespace OptionLib
     /// </summary>
     public sealed class OptionWithParameterAttribute : OptionBase
     {
+        /// <summary>
+        /// Class constructor.
+        /// </summary>
         public OptionWithParameterAttribute()
             : base() {
         }

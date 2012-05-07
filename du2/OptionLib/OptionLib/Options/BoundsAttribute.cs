@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-//TODO: predelat na int i float like promenne, tj. zadávat hodnotu attributu jako string
 namespace OptionLib
 {
     /// <summary>
@@ -17,13 +16,13 @@ namespace OptionLib
         /// </summary>
         public BoundsAttribute()
             : base() {
-                LowerBound = int.MinValue;
-                UpperBound = int.MaxValue;
+                LowerBound = null;
+                UpperBound = null;
         }
 
         /// <summary>Lower bound property</summary>
         /// <value>Stores the lower bound for given ProgramOptionsBase field.</value>
-        public int LowerBound
+        public object LowerBound
         {
             get;
             set;
@@ -31,10 +30,35 @@ namespace OptionLib
 
         /// <summary>Upper bound property</summary>
         /// <value>Stores the upper bound for given ProgramOptionsBase field.</value>
-        public int UpperBound
+        public object UpperBound
         {
             get;
             set;
         }
+
+        /// <summary>
+        /// Checks if value is greater or equal than LowerBound.
+        /// </summary>
+        /// <param name="value">Value to check</param>
+        /// <returns></returns>
+        public bool CheckLowerBound(IComparable value) {
+            if (value.GetType() != LowerBound.GetType()) {
+                LowerBound = System.ComponentModel.TypeDescriptor.GetConverter(value.GetType()).ConvertFrom(LowerBound);
+            }
+            return LowerBound == null ? true : value.CompareTo(LowerBound) >= 0;
+        }
+
+        /// <summary>
+        /// Checks if value is lesser or equal than UpperBound
+        /// </summary>
+        /// <param name="value">Value to check</param>
+        /// <returns></returns>
+        public bool CheckUpperBound(IComparable value) {
+            if (value.GetType() != UpperBound.GetType()) {
+                UpperBound = System.ComponentModel.TypeDescriptor.GetConverter(value.GetType()).ConvertFrom(UpperBound);
+            }
+            return UpperBound == null ? true : value.CompareTo(UpperBound) <= 0;
+        }
+
     }
 }
