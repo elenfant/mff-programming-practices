@@ -4,7 +4,7 @@ else
 	TARGET=./bin/$(TARGET)
 endif
 
-MCS=gmcs
+MCS=mcs
 ifndef (RELEASE)
 	MCSFLAGS=-debug --stacktrace
 endif

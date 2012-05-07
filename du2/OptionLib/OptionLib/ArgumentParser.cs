@@ -69,7 +69,7 @@ namespace OptionLib
                 }
             }
             Log("\nPLAIN ARGUMENTS:");
-            Log(string.Join("\n", arguments));
+            Log(string.Join("\n", arguments.ToArray()));
             return arguments;// as they are local variable for now (and not private parser field), we dont need to: new List<string>(arguments);
         }
 
