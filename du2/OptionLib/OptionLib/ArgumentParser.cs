@@ -190,7 +190,7 @@ namespace OptionLib
                     /* prepare for parameters? */
                     if (option.GetType() == typeof(OptionAttribute)) {
                         if (eqPosition != -1) {
-                            throw new OptionParameterDisalowedException(option.Name, arg.Substring(eqPosition + 1));
+                            throw new OptionParameterDisallowedException(option.Name, arg.Substring(eqPosition + 1));
                         }
                         option.SetValue("true", programOptions);
                     }
