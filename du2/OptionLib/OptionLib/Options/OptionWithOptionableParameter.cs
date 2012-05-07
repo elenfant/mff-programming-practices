@@ -56,5 +56,20 @@ namespace OptionLib
                 return defaultValue;
             }
         }
+
+        /// <summary>
+        /// Checks if value in defaultValue field has same type as corresponding field, else tries to convert it. If conversion fails, exception is thrown.
+        /// </summary>
+        /// <param name="fieldInfo">FieldInfo of corresponding field</param>
+        /// <param name="optionName">Option name</param>
+        public override void CheckDefinition(System.Reflection.FieldInfo fieldInfo, string optionName) {
+            var converter = System.ComponentModel.TypeDescriptor.GetConverter(fieldInfo);
+            if (converter.CanConvertFrom(defaultValue.GetType())) {
+                defaultValue = converter.ConvertFrom(defaultValue);
+            } else {
+                throw new InvalidDefinitionException(optionName, "Value in defaultValue must have same type as corresponding option field " + fieldInfo.Name); 
+            }
+
+        }
     }
 }

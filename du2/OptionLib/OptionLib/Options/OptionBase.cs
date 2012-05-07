@@ -83,6 +83,14 @@ namespace OptionLib
             }
         }
 
+        /// <summary>
+        /// Virtual method that checks if option definition is correct.
+        /// </summary>
+        /// <param name="fieldInfo">Corresponding option field info</param>
+        /// <param name="optionName">Option name</param>
+        public virtual void CheckDefinition(FieldInfo fieldInfo, string optionName) {
+        }
+
     }
 
     /// <summary>

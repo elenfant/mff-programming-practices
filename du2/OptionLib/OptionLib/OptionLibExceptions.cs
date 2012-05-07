@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -141,4 +141,18 @@ namespace OptionLib
         }
     }
 
+    /// <summary>
+    /// InvalidDefinitionException is thrown when option definition is not correct for given option.
+    /// </summary>
+    public class InvalidDefinitionException : OptionException
+    {
+        /// <summary>
+        /// Exception constructor.
+        /// </summary>
+        /// <param name="optionName">name of the option with invalid definition</param>
+        /// <param name="message">optional message</param>
+        public InvalidDefinitionException(string optionName, string message = "")
+            : base(optionName, message) {
+        }
+    }
 }

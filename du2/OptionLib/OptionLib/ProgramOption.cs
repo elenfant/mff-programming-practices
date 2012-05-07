@@ -33,7 +33,7 @@ namespace OptionLib
 
             if (longNames.Count == 0 && shortNames.Count == 0)
             {
-                throw new NotSupportedException("Options must have at least one name. Add ShortName and/or LongName attribute.");
+                throw new InvalidDefinitionException(fieldInfo.Name, "Options must have at least one name. Add ShortName and/or LongName attribute.");
             }
         }
 
@@ -144,6 +144,7 @@ namespace OptionLib
             {
                 return;
             }
+            bounds.CheckBoundsDefinition(fieldInfo, Name);
             if (!bounds.CheckLowerBound(value))
             {
                 throw new OptionOutOfBoundException(Name, "", value, bounds.LowerBound);
