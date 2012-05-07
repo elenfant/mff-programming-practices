@@ -10,6 +10,9 @@ namespace OptionLib
     /// </summary>
     public class OptionAttribute : OptionBase
     {
+        /// <summary>
+        /// Class contructor. OptionAttribute corresponds to simple bool field.
+        /// </summary>
         public OptionAttribute() {
 
         }

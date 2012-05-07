@@ -8,7 +8,10 @@ using System.IO;
 
 namespace OptionLib
 {
-    class ArgumentParser
+    /// <summary>
+    /// ArgumentParser parses given command-line arguments based on given ProgramOptions.
+    /// </summary>
+    internal class ArgumentParser
     {
         private enum ArgumentType
         {
@@ -26,7 +29,15 @@ namespace OptionLib
 
         private TextWriter output;
         private ProgramOptionsBase programOptions;
-        public ArgumentParser(ProgramOptionsBase programOptions, TextWriter output = null) {
+
+        /// <summary>
+        /// Class contructor.
+        /// <see cref="ProgramOptionsBase"/> for additional information passed to ArgumentParser.
+        /// </summary>
+        /// <param name="programOptions">Instance of program options derived from ProgramOptionsBase.</param>
+        /// <param name="output">TextWriter to output debug messages in debug mode.</param>
+        internal ArgumentParser(ProgramOptionsBase programOptions, TextWriter output = null)
+        {
             this.programOptions = programOptions;
             this.output = output;
             if (output == null) {

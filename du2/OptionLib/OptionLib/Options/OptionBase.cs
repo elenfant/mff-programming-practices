@@ -67,7 +67,16 @@ namespace OptionLib
             return helpText.ToString();
         }
 
-        protected virtual string GetHelpTextForName(string name, NameType type) {
+        /// <summary>
+        /// Prepares help text for given option string <paramref name="name"/> and its <paramref name="type"/>.
+        /// </summary>
+        /// <param name="name">Option string.</param>
+        /// <param name="type">Type of given option string. <see cref="NameType"/> for possible values (Short or Long).</param>
+        /// <returns>Help string for given option.</returns>
+        /// <seealso cref="NameType" />
+        /// <example><para><c>-f</c> is short option string</para><para><c>--format</c> is long option string</para></example>
+        protected virtual string GetHelpTextForName(string name, NameType type)
+        {
             switch (type) {
                 case NameType.Short: return string.Format("-{0}", name);
                 case NameType.Long: return string.Format("--{0}", name);

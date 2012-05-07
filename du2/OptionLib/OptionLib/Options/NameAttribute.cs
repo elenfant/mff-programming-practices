@@ -25,7 +25,7 @@ namespace OptionLib
                 return;
             }
             foreach (string name in names) {
-                if (name == null || name.Trim() == "") {
+                if (name == null || name.Trim().Length == 0) {
                     continue;
                 }
                 this.names.Add(name);
