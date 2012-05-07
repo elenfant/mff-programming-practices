@@ -144,6 +144,7 @@ namespace OptionLib
             {
                 return;
             }
+            bounds.CheckBoundsDefinition(fieldInfo);
             if (!bounds.CheckLowerBound(value))
             {
                 throw new NotSupportedException("Value of option " + Name + " must be greater than or equal to " + bounds.LowerBound + ". Smaller value (" + value + ") provided.");

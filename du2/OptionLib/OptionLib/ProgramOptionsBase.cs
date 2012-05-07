@@ -44,10 +44,11 @@ namespace OptionLib
 
             var fieldInfos = this.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
             foreach (var fieldInfo in fieldInfos) {
-                Attribute optionAttribute = Attribute.GetCustomAttribute(fieldInfo, typeof(OptionBase));
+                OptionBase optionAttribute = (OptionBase)Attribute.GetCustomAttribute(fieldInfo, typeof(OptionBase));
                 if (optionAttribute == null) {
                     continue;
                 }
+                optionAttribute.CheckDefinition(fieldInfo);
                 ShortNameAttribute shortNameAttribute = (ShortNameAttribute)Attribute.GetCustomAttribute(fieldInfo, typeof(ShortNameAttribute));
                 LongNameAttribute longNameAttribute = (LongNameAttribute)Attribute.GetCustomAttribute(fieldInfo, typeof(LongNameAttribute));
                 ProgramOption option = new ProgramOption(fieldInfo, (OptionBase)optionAttribute, shortNameAttribute, longNameAttribute);

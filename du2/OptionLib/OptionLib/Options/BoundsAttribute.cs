@@ -6,13 +6,13 @@ using System.Text;
 namespace OptionLib
 {
     /// <summary>
-    /// Bounds used for corresponding integer option.
+    /// Bounds used for corresponding comparable type option.
     /// </summary>
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
     public sealed class BoundsAttribute : Attribute
     {
         /// <summary>
-        /// Class contructor. Both bounds are set to corresponding integer limits.
+        /// Class contructor. Both bounds are set to null, representing no limits.
         /// </summary>
         public BoundsAttribute()
             : base() {
@@ -42,9 +42,6 @@ namespace OptionLib
         /// <param name="value">Value to check</param>
         /// <returns></returns>
         public bool CheckLowerBound(IComparable value) {
-            if (value.GetType() != LowerBound.GetType()) {
-                LowerBound = System.ComponentModel.TypeDescriptor.GetConverter(value.GetType()).ConvertFrom(LowerBound);
-            }
             return LowerBound == null ? true : value.CompareTo(LowerBound) >= 0;
         }
 
@@ -54,10 +51,22 @@ namespace OptionLib
         /// <param name="value">Value to check</param>
         /// <returns></returns>
         public bool CheckUpperBound(IComparable value) {
-            if (value.GetType() != UpperBound.GetType()) {
-                UpperBound = System.ComponentModel.TypeDescriptor.GetConverter(value.GetType()).ConvertFrom(UpperBound);
-            }
             return UpperBound == null ? true : value.CompareTo(UpperBound) <= 0;
+        }
+
+        /// <summary>
+        /// Checks if bound values have correct type.
+        /// </summary>
+        /// <param name="fieldInfo">Corresponding option field info</param>
+        public  void CheckBoundsDefinition(System.Reflection.FieldInfo fieldInfo) {
+            var converter = System.ComponentModel.TypeDescriptor.GetConverter(fieldInfo);
+            if (converter.CanConvertFrom(LowerBound.GetType()) && converter.CanConvertFrom(UpperBound.GetType())) {
+                LowerBound = converter.ConvertFrom(LowerBound);
+                UpperBound = converter.ConvertFrom(UpperBound);
+            }
+            else {
+                throw new InvalidDefinitionException("Values in LowerBound and UpperBound must have same type as corresponding option field " + fieldInfo.Name);
+            }
         }
 
     }
