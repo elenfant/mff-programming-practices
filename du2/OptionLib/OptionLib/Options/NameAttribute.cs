@@ -13,13 +13,20 @@ namespace OptionLib
     {
         private List<string> names;
 
+        /// <summary>
+        /// Names collection for corresponding option.
+        /// </summary>
         public List<string> Names {
             get {
                 return names;
             }
         }
 
-        public NameAttribute(params string[] names) {
+        /// <summary>
+        /// Class constructor.
+        /// </summary>
+        /// <param name="names">List of names for corresponding option.</param>
+        protected NameAttribute(params string[] names) {
             this.names = new List<string>();
             if (names == null) {
                 return;

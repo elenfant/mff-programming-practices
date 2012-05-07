@@ -10,6 +10,10 @@ namespace OptionLib
     /// </summary>
     public sealed class LongNameAttribute : NameAttribute
     {
+        /// <summary>
+        /// Class constructor.
+        /// </summary>
+        /// <param name="names">List of long names for corresponding option</param>
         public LongNameAttribute(params string[] names)
             : base(names) {
         }

@@ -105,9 +105,9 @@ namespace OptionLib
                 } catch (NotSupportedException) {
                     return false;
                 }
-                if (fieldType == typeof(int))
+                if (value is IComparable)
                 {
-                    BoundsCheck((int)value);
+                    BoundsCheck((IComparable)value);
                 }
                 fieldInfo.SetValue(options, value);
             }
@@ -137,18 +137,18 @@ namespace OptionLib
             IsPresent = true;
         }
 
-        private void BoundsCheck(int value)
+        private void BoundsCheck(IComparable value)
         {
             BoundsAttribute bounds = (BoundsAttribute)Attribute.GetCustomAttribute(fieldInfo, typeof(BoundsAttribute));
             if (bounds == null)
             {
                 return;
             }
-            if (value < bounds.LowerBound)
+            if (!bounds.CheckLowerBound(value))
             {
                 throw new NotSupportedException("Value of option " + Name + " must be greater than or equal to " + bounds.LowerBound + ". Smaller value (" + value + ") provided.");
             }
-            if (value > bounds.UpperBound)
+            if (!bounds.CheckUpperBound(value))
             {
                 throw new NotSupportedException("Value of option " + Name + " must be smaller than or equal to " + bounds.UpperBound + ". Greater value (" + value + ") provided.");
             }

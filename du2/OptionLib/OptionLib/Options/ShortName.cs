@@ -10,6 +10,10 @@ namespace OptionLib
     /// </summary>
     public sealed class ShortNameAttribute : NameAttribute
     {
+        /// <summary>
+        /// Class constructor.
+        /// </summary>
+        /// <param name="names">Short names for corresponding option.</param>
         public ShortNameAttribute(params string[] names)
             : base(names) {
         }

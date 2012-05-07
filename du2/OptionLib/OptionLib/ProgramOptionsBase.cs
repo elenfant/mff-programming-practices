@@ -58,11 +58,17 @@ namespace OptionLib
             arguments.AddRange(argParser.ParseCommandLine(optionList, args));
             CheckRequiredOptions();
         }
-
+        
+        /// <summary>
+        /// Standard help option.
+        /// </summary>
         [Option(Description = "Print a usage message on standard output and exit successfully.")]
         [LongName("help")]
         public bool help;
 
+        /// <summary>
+        /// Standard version option.
+        /// </summary>
         [Option(Description = "Print version information on standard output, then exit successfully.")]
         [ShortName("V"), LongName("version")]
         public bool version;
@@ -75,12 +81,23 @@ namespace OptionLib
             }
         }
 
+        /// <summary>
+        /// Abstract method, where library user can specify description of his program.
+        /// </summary>
+        /// <returns>Program description</returns>
         protected abstract string GetProgramHelpText();
 
+        /// <summary>
+        /// Prints program version. Used when standard version option is present.
+        /// </summary>
         public void PrintVersion() {
             Console.WriteLine(GetVersionInformation());
         }
 
+        /// <summary>
+        /// Abstract method, where library user can specify version information of his program.
+        /// </summary>
+        /// <returns>Version information</returns>
         protected abstract string GetVersionInformation();
 
         private const string TerminateOptionListText = Printer.FIRST_LEVEL_INDENT + "--\n" + Printer.SECOND_LEVEL_INDENT + "Terminate option list.";
