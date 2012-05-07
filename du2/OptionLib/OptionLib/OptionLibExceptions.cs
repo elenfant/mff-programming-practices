@@ -23,19 +23,13 @@ namespace OptionLib
 
     public class OptionOutOfBoundException : OptionException
     {
-        public int? value = null;
-        public int? bound = null;
+        public IComparable value = null;
+        public object bound = null;
 
-        public OptionOutOfBoundException(string optionName, string message = "", int? value = null, int? bound = null)
+        public OptionOutOfBoundException(string optionName, string message = "", IComparable value = null, object bound = null)
             : base(optionName) {
-            if (value.HasValue)
-            {
-                this.value = value;
-            }
-            if (bound.HasValue)
-            {
-                this.bound = bound;
-            }
+            this.value = value;
+            this.bound = bound;
         }
     }
 
