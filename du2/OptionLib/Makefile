@@ -9,14 +9,13 @@ ifndef (RELEASE)
 	MCSFLAGS=-debug --stacktrace
 endif
 
-PATH=c:\Program Files (x86)\Mono-2.11\bin\
 
-USECASES_EXE=$(TARGET)/usecases.exe
-USECASES_PDB=$(TARGET)/optionlib.dll
+USECASES_EXE=UseCases/$(TARGET)/usecases.exe
+USECASES_PDB=UseCases/$(TARGET)/optionlib.dll
 USECASES_SRC=./UseCases
 
-OPTIONLIB_DLL=$(TARGET)/optionlib.dll
-OPTIONLIB_PDB=$(TARGET)/optionlib.dll
+OPTIONLIB_DLL=OptionLib/$(TARGET)/optionlib.dll
+OPTIONLIB_PDB=OptionLib/$(TARGET)/optionlib.dll
 OPTIONLIB_SRC=./OptionLib/ArgumentParser.cs \
 	./OptionLib/Printer.cs \
 	./OptionLib/ProgramOptionsBase.cs \
@@ -28,11 +27,13 @@ OPTIONLIB_SRC=./OptionLib/ArgumentParser.cs \
 	./OptionLib/Options/Option.cs \
 	./OptionLib/Options/OptionBase.cs \
 	./OptionLib/Options/OptionWithParameter.cs \
-	./OptionLib/Options/OptionWithOptionableParameter.cs
+	./OptionLib/Options/OptionWithOptionableParameter.cs \
+	./OptionLib/OptionLibExceptions.cs
 
 $(OPTIONLIB_DLL): $(OPTIONLIB_SRC) 
-	-mkdir -p $(TARGET)
-	$(PATH)$(MCS) $(MCSFLAGS) $(LIBS) -target:library -out:$(OPTIONLIB_DLL) $(OPTIONLIB_SRC)
+	-mkdir -p UseCases/$(TARGET)
+	-mkdir -p OptionLib/$(TARGET)
+	$(MCS) $(MCSFLAGS) $(LIBS) -target:library -out:$(OPTIONLIB_DLL) $(OPTIONLIB_SRC)
 
 # common targets
 
