@@ -38,6 +38,10 @@ namespace OptionLib
         /// Initializes the program options, proccesses the command line arguments and sets option values.
         /// </summary>
         /// <param name="args">Input from command line.</param>
+        /// OptionInvalidException
+        /// OptionsClashException
+        /// OptionParameterDisalowedException
+        /// RequiredParameterMissingException
         public void Initialize(string[] args) {
 
             optionList = new List<ProgramOption>();
@@ -77,7 +81,7 @@ namespace OptionLib
         private void CheckRequiredOptions() {
             foreach (var option in optionList) {
                 if (option.IsRequired() && !option.IsPresent) {
-                //TODO: Required option is not present!
+                    throw new RequiredOptionMissingException(option.Name);
                 }
             }
         }
