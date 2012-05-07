@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ArgumentParser.cs" />
+    <Compile Include="OptionLibExceptions.cs" />
     <Compile Include="Options\BoundsAttribute.cs" />
     <Compile Include="Options\OptionBase.cs" />
     <Compile Include="Options\LongName.cs" />

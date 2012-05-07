@@ -33,7 +33,7 @@ namespace OptionLib
 
             if (longNames.Count == 0 && shortNames.Count == 0)
             {
-                throw new NotSupportedException("Option must have at least one name. Add ShortName and/or LongName attribute.");
+                throw new NotSupportedException("Options must have at least one name. Add ShortName and/or LongName attribute.");
             }
         }
 
@@ -130,7 +130,7 @@ namespace OptionLib
         {
             if (optionAttribute.GetType() != typeof(OptionWithParameterAttribute))
             {
-                throw new NotSupportedException("Option " + optionAttribute.GetType() + " doesn't have any default value.");
+                throw new DefaultOptionMissingException(Name);
             }
             /* user has to set DefaultValue in correct type */
             fieldInfo.SetValue(programOptions, ((OptionWithOptionableParameterAttribute)optionAttribute).DefaultValue);
@@ -146,11 +146,11 @@ namespace OptionLib
             }
             if (value < bounds.LowerBound)
             {
-                throw new NotSupportedException("Value of option " + Name + " must be greater than or equal to " + bounds.LowerBound + ". Smaller value (" + value + ") provided.");
+                throw new OptionOutOfBoundException(Name, "", value, bounds.LowerBound);
             }
             if (value > bounds.UpperBound)
             {
-                throw new NotSupportedException("Value of option " + Name + " must be smaller than or equal to " + bounds.UpperBound + ". Greater value (" + value + ") provided.");
+                throw new OptionOutOfBoundException(Name, "", value, bounds.UpperBound);
             }
 
         }

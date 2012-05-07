@@ -36,8 +36,7 @@ namespace OptionLib
         /// </summary>
         /// <param name="programOptions">Instance of program options derived from ProgramOptionsBase.</param>
         /// <param name="output">TextWriter to output debug messages in debug mode.</param>
-        internal ArgumentParser(ProgramOptionsBase programOptions, TextWriter output = null)
-        {
+        internal ArgumentParser(ProgramOptionsBase programOptions, TextWriter output = null) {
             this.programOptions = programOptions;
             this.output = output;
             if (output == null) {
@@ -76,7 +75,8 @@ namespace OptionLib
                         break;
 
                     default:
-                        throw new NotSupportedException();
+                        /* should not happen as GetArgumentType(arg) returns only one from the above options (cases) */
+                        throw new NotSupportedException("Unexpected currentArgType");
                 }
             }
             Log("\nPLAIN ARGUMENTS:");
@@ -134,8 +134,7 @@ namespace OptionLib
                         option = optionsDictionary[arg.Substring(1)];
                     }
                     catch (KeyNotFoundException) {
-                        LogInvalidArgument(arg);
-                        throw new NotSupportedException("Invalid option -- " + arg.Substring(1));
+                        throw new OptionInvalidException(arg.Substring(1));
                     }
 
                     /* prepare for parameters? */
@@ -153,10 +152,11 @@ namespace OptionLib
 
                 /* required option parameter, but short option found => exception */
                 case ArgumentType.ARGUMENT_PARAMETER:
-                    throw new NotSupportedException("Option found, required parameter expected.");
+                    throw new OptionsClashException(prevOption.Name, arg, "Option found, required parameter expected.");
 
                 default:
-                    throw new NotImplementedException("Unknown ArgumentParser.ArgumentType!");
+                    /* should not happen as expectedArgType is set only to above proccessed cases */
+                    throw new NotSupportedException("Unexpected expectedArgType :-)");
             }
             prevOption = option;
             return;
@@ -184,14 +184,13 @@ namespace OptionLib
                         }
                     }
                     catch (KeyNotFoundException) {
-                        LogInvalidArgument(arg);
-                        throw new NotSupportedException("Invalid option -- " + arg.Substring(2));
+                        throw new OptionInvalidException(arg.Substring(2));
                     }
 
                     /* prepare for parameters? */
                     if (option.GetType() == typeof(OptionAttribute)) {
                         if (eqPosition != -1) {
-                            throw new NotSupportedException("Option parameter for option " + option.Name + " disallowed.");
+                            throw new OptionParameterDisalowedException(option.Name, arg.Substring(eqPosition + 1));
                         }
                         option.SetValue("true", programOptions);
                     }
@@ -205,7 +204,7 @@ namespace OptionLib
                     }
                     else if (option.GetType() == typeof(OptionWithParameterAttribute)) {
                         if (eqPosition != -1) {
-                            throw new NotSupportedException("Required parameter for option " + option.Name + " is missing.");
+                            throw new RequiredParameterMissingException(option.Name);
                         }
                         else {
                             option.SetValue(arg.Substring(eqPosition + 1), programOptions);
@@ -215,10 +214,11 @@ namespace OptionLib
 
                 /* required option parameter, but short option found => exception */
                 case ArgumentType.ARGUMENT_PARAMETER:
-                    throw new NotSupportedException("Option found, required parameter expected.");
+                    throw new OptionsClashException(prevOption.Name, arg, "Option found, required parameter expected.");
 
                 default:
-                    throw new NotImplementedException("Unknown ArgumentParser.ArgumentType!");
+                    /* should not happen as expectedArgType is set only to above proccessed cases */
+                    throw new NotSupportedException("Unexpected expectedArgType :-)");
             }
             expectedArgType = ArgumentType.ANY;
             prevOption = option;
@@ -241,7 +241,8 @@ namespace OptionLib
                     break;
 
                 default:
-                    throw new NotImplementedException("Can't expect any option!");
+                    /* should not happen as expectedArgType is set only to above proccessed cases */
+                    throw new NotSupportedException("Unexpected expectedArgType :-)");
             }
             expectedArgType = ArgumentType.ANY;
         }
@@ -251,11 +252,6 @@ namespace OptionLib
             output.WriteLine(msg);
         }
 
-        private void LogInvalidArgument(string option) {
-            //AssemblyTitleAttribute assemblyTitleAttr = (AssemblyTitleAttribute) Attribute.GetCustomAttribute(programOptions.GetType().Assembly, typeof(AssemblyTitleAttribute));
-            //output.WriteLine(assemblyTitleAttr.Title + ": invalid option - " + option);
-            output.WriteLine("invalid option - " + option);
-        }
     }
 
 }
