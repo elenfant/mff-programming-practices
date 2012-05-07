@@ -52,10 +52,10 @@ namespace OptionLib
                 if (optionAttribute == null) {
                     continue;
                 }
-                optionAttribute.CheckDefinition(fieldInfo);
                 ShortNameAttribute shortNameAttribute = (ShortNameAttribute)Attribute.GetCustomAttribute(fieldInfo, typeof(ShortNameAttribute));
                 LongNameAttribute longNameAttribute = (LongNameAttribute)Attribute.GetCustomAttribute(fieldInfo, typeof(LongNameAttribute));
                 ProgramOption option = new ProgramOption(fieldInfo, (OptionBase)optionAttribute, shortNameAttribute, longNameAttribute);
+                optionAttribute.CheckDefinition(fieldInfo, option.Name);
                 optionList.Add(option);
             }
 

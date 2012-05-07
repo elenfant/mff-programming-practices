@@ -144,7 +144,7 @@ namespace OptionLib
             {
                 return;
             }
-            bounds.CheckBoundsDefinition(fieldInfo);
+            bounds.CheckBoundsDefinition(fieldInfo, Name);
             if (!bounds.CheckLowerBound(value))
             {
                 throw new OptionOutOfBoundException(Name, "", value, bounds.LowerBound);

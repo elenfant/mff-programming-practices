@@ -43,7 +43,6 @@
     <Compile Include="ArgumentParser.cs" />
     <Compile Include="OptionLibExceptions.cs" />
     <Compile Include="Options\BoundsAttribute.cs" />
-    <Compile Include="Options\InvalidDefinitionException.cs" />
     <Compile Include="Options\OptionBase.cs" />
     <Compile Include="Options\LongName.cs" />
     <Compile Include="Options\NameAttribute.cs" />

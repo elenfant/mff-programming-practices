@@ -21,9 +21,10 @@ namespace OptionLib
         /// Checks if corresponding field is bool, as should be.
         /// </summary>
         /// <param name="fieldInfo">Corresponding option field info</param>
-        public override void CheckDefinition(System.Reflection.FieldInfo fieldInfo) {
+        /// <param name="optionName">Option name</param>
+        public override void CheckDefinition(System.Reflection.FieldInfo fieldInfo, string optionName) {
             if (fieldInfo.FieldType != typeof(bool)) {
-                throw new InvalidDefinitionException("Corresponding field to Option must be bool.");
+                throw new InvalidDefinitionException(optionName, "Corresponding field to Option must be bool.");
             }
         }
     }

@@ -58,14 +58,15 @@ namespace OptionLib
         /// Checks if bound values have correct type.
         /// </summary>
         /// <param name="fieldInfo">Corresponding option field info</param>
-        public  void CheckBoundsDefinition(System.Reflection.FieldInfo fieldInfo) {
+        /// <param name="optionName">Option name</param>
+        public  void CheckBoundsDefinition(System.Reflection.FieldInfo fieldInfo, string optionName) {
             var converter = System.ComponentModel.TypeDescriptor.GetConverter(fieldInfo);
             if (converter.CanConvertFrom(LowerBound.GetType()) && converter.CanConvertFrom(UpperBound.GetType())) {
                 LowerBound = converter.ConvertFrom(LowerBound);
                 UpperBound = converter.ConvertFrom(UpperBound);
             }
             else {
-                throw new InvalidDefinitionException("Values in LowerBound and UpperBound must have same type as corresponding option field " + fieldInfo.Name);
+                throw new InvalidDefinitionException(optionName, "Values in LowerBound and UpperBound must have same type as corresponding option field " + fieldInfo.Name);
             }
         }
 

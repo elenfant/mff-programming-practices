@@ -69,7 +69,14 @@ namespace OptionLib
     public class DefaultOptionMissingException : OptionException
     {
         public DefaultOptionMissingException(string optionName, string message = "")
-            : base(optionName) {
+            : base(optionName, message) {
+        }
+    }
+
+    public class InvalidDefinitionException : OptionException
+    {
+        public InvalidDefinitionException(string optionName, string message)
+            : base(optionName, message) {
         }
     }
 }
