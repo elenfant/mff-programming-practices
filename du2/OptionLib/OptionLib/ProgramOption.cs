@@ -130,7 +130,7 @@ namespace OptionLib
         {
             if (optionAttribute.GetType() != typeof(OptionWithParameterAttribute))
             {
-                throw new DefaultOptionMissingException(Name);
+                throw new RequiredParameterMissingException(Name);
             }
             /* user has to set DefaultValue in correct type */
             fieldInfo.SetValue(programOptions, ((OptionWithOptionableParameterAttribute)optionAttribute).DefaultValue);
