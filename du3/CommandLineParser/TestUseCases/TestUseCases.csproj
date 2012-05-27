@@ -2,18 +2,20 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{4DA45503-3E79-43DE-BAF1-96342E82B280}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{C08889A1-411E-4574-BE15-9F4855848D0B}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CommandLineParser</RootNamespace>
-    <AssemblyName>CommandLineParser</AssemblyName>
+    <RootNamespace>TestUseCases</RootNamespace>
+    <AssemblyName>TestUseCases</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -22,7 +24,8 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -31,16 +34,16 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.CSharp" />
+    <Compile Include="Program.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CommandLineBoolOption.cs" />
-    <Compile Include="CommandLineIntOption.cs" />
-    <Compile Include="CommandLineOption.cs" />
-    <Compile Include="CommandLineParser.cs" />
-    <Compile Include="CommandLineStringOption.cs" />
-    <Compile Include="ConfigurationException.cs" />
-    <Compile Include="ParsingException.cs" />
+    <ProjectReference Include="..\CommandLineParser\CommandLineParser.csproj">
+      <Project>{4DA45503-3E79-43DE-BAF1-96342E82B280}</Project>
+      <Name>CommandLineParser</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

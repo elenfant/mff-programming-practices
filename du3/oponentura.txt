@@ -1,1 +1,28 @@
 DU3: OPONENTURA DU2
+
+knihovna CommandLineParser
+
+CommandLineBoolOption nenastavuje Value member
+
+možnost zmìny jmen po vytvoøení objektu (nechal bych set private)
+
+
+líbí se mi použití delegáta na postparse callback
+
+tisk helpu by mìl nìjak naznaèit, že je option required
+
+u optionu bych nechal name a shortname private, proc bych je kdy chtel cist/menit?
+
+zadani neexistujici (kratke) volby shodi cely program vyjimkou
+(null reference pointer, jelikoz ParsingExc nema nastavenu Option field, jelikoz je zpusobena nenalezenim optionu v seznamu)
+!!! tohle se tyka jen use casu, v normalnim pouziti zalezi na uzivateli, nicmene na Option field nelze spolehat, je ho treba testovat
+ a pokud doslo napr k preklepu v optionu, pak nezjidtim v kterem!!!
+
+ lze dovolit, aby booloption byl required, coz je nesmysl (pak uzivatel nema moznost volby, ale navic ke jmenu spustitelneho souboru musi vzdy povinen pridat dalsi povinne parametry)
+ 
+ nastaveni parametertype na required u booloptionu vede k exceptione, i kdyz "jakoby" parameter zadame
+ proto by se melo toto nastaveni u booloptionu uplne zakazat, kontrolovat pristup k ParameterType
+
+ v dokumentaci chybi udaje o vyhazovanych vyjimkach a z jakeho duvodu jsou tyto vyhazovany
+
+ chybi udaje o defaultnim nastaveni (Option.Required, Option.ParameterType)

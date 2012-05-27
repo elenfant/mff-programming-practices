@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{4DA45503-3E79-43DE-BAF1-96342E82B280}</ProjectGuid>
+    <ProjectGuid>{5604B0E9-C05B-47A9-9C1C-A2F083F02507}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CommandLineParser</RootNamespace>
-    <AssemblyName>CommandLineParser</AssemblyName>
+    <RootNamespace>CommandLineParserFacts</RootNamespace>
+    <AssemblyName>CommandLineParserTests</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -32,18 +32,25 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="xunit">
+      <HintPath>..\..\..\..\..\..\..\..\..\Program Files\_noinstall\xunit-1.9\xunit.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CommandLineBoolOption.cs" />
-    <Compile Include="CommandLineIntOption.cs" />
-    <Compile Include="CommandLineOption.cs" />
-    <Compile Include="CommandLineParser.cs" />
-    <Compile Include="CommandLineStringOption.cs" />
-    <Compile Include="ConfigurationException.cs" />
-    <Compile Include="ParsingException.cs" />
+    <Compile Include="CommandLineBoolOptionFacts.cs" />
+    <Compile Include="CommandLineIntOptionFacts.cs" />
+    <Compile Include="CommandLineOptionFacts.cs" />
+    <Compile Include="CommandLineParserFacts.cs" />
+    <Compile Include="CommandLineStringOptionFacts.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CommandLineParser\CommandLineParser.csproj">
+      <Project>{4DA45503-3E79-43DE-BAF1-96342E82B280}</Project>
+      <Name>CommandLineParser</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
