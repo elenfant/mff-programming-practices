@@ -15,30 +15,32 @@ namespace CommandLineParserFacts
         }
 
         [Fact]
-        public void stringOptionRemembersAllowedValues()
+        public void remembersAllowedValues()
         {
             CommandLineStringOption view = new CommandLineStringOption("view");
             view.AllowedValues.Add("scientific");
             view.AllowedValues.Add("programmer");
             view.AllowedValues.Add("standard");
             /* in different order */
-            List<string> expectedAllowedValues = new List<string>(new string[] { "programmer", "scientific", "standard" });
+            string[] expectedAllowedValues = new string[] { "programmer", "scientific", "standard" };
 
             Assert.Equal(expectedAllowedValues, view.AllowedValues, new CollectionEquivalenceComparer<string>());
         }
 
         [Fact]
-        public void stringOptionAllowedAnyFact()
+        public void allowedAnyFact()
         {
             CommandLineStringOption format = new CommandLineStringOption("format");
             parser.AddOption(format);
             string expectedValue = "Value of N is %7d\n";
-            List<string> arguments = parser.Parse(new string[] { "--format=" + expectedValue });
+            
+            parser.Parse(new string[] { "--format=" + expectedValue });
+            
             Assert.Equal(expectedValue, format.Value);
         }
 
         [Fact]
-        public void stringOptionAllowedFact()
+        public void allowedSomeFact()
         {
             CommandLineStringOption view = new CommandLineStringOption("view");
             view.AllowedValues.Add("scientific");
@@ -46,12 +48,13 @@ namespace CommandLineParserFacts
             view.AllowedValues.Add("standard");
             parser.AddOption(view);
 
-            List<string> arguments = parser.Parse(new string[] { "--view=standard" });
+            parser.Parse(new string[] { "--view=standard" });
+            
             Assert.Equal("standard", view.Value);
         }
 
         [Fact]
-        public void stringOptionCaseSensitiveThrowsException()
+        public void caseSensitiveThrowsException()
         {
             CommandLineStringOption view = new CommandLineStringOption("view");
             view.AllowedValues.Add("standard");
@@ -60,12 +63,12 @@ namespace CommandLineParserFacts
             Assert.Throws<ParsingException>(
                 delegate
                 {
-                    List<string> arguments = parser.Parse(new string[] { "--view=STANDARD" });
+                    parser.Parse(new string[] { "--view=STANDARD" });
                 });
         }
 
         [Fact]
-        public void stringOptionNotAllowedThrowsExcption()
+        public void notAllowedThrowsException()
         {
             CommandLineStringOption view = new CommandLineStringOption("view");
             view.AllowedValues.Add("scientific");
@@ -76,30 +79,67 @@ namespace CommandLineParserFacts
             Assert.Throws<ParsingException>(
                 delegate
                 {
-                    List<string> arguments = parser.Parse(new string[] { "--view=statistics" });
+                    parser.Parse(new string[] { "--view=statistics" });
                 });
         }
 
         [Fact]
-        public void stringOptionEmptyParameterAllowedFact()
+        public void emptyParameterAllowedFact()
         {
             CommandLineStringOption view = new CommandLineStringOption("view");
             view.AllowedValues.Add("");
             parser.AddOption(view);
-            List<string> arguments = parser.Parse(new string[] { "--view=" });
+            
+            parser.Parse(new string[] { "--view=" });
 
             Assert.Equal("", view.Value);
         }
 
         [Fact]
-        public void stringOptionNullParameterAllowedFact()
+        public void nullParameterAllowedFact()
         {
             CommandLineStringOption view = new CommandLineStringOption("view");
-            view.AllowedValues.Add(null);
             parser.AddOption(view);
-            List<string> arguments = parser.Parse(new string[] { "--view", null });
+         
+            parser.Parse(new string[] { "--view", null });
 
             Assert.Null(view.Value);
+        }
+
+        [Fact]
+        public void parameterTypeNoneFact()
+        {
+            CommandLineStringOption view = new CommandLineStringOption("view");
+            view.ParameterType = ParameterType.None;
+            parser.AddOption(view);
+
+            parser.Parse(new string[] { "--view"});
+
+            Assert.Null(view.Value);
+        }
+
+        [Fact]
+        public void missingParameterTypeOptionalFact()
+        {
+            CommandLineStringOption view = new CommandLineStringOption("view");
+            view.ParameterType = ParameterType.Optional;
+            parser.AddOption(view);
+
+            parser.Parse(new string[] { "--view" });
+
+            Assert.Null(view.Value);
+        }
+
+        [Fact]
+        public void parameterTypeOptionalFact()
+        {
+            CommandLineStringOption view = new CommandLineStringOption("view");
+            view.ParameterType = ParameterType.Optional;
+            parser.AddOption(view);
+
+            parser.Parse(new string[] { "--view", "standard" });
+
+            Assert.Equal("standard", view.Value);
         }
 
     }

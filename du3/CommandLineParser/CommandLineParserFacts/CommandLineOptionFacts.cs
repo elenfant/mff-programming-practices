@@ -13,20 +13,12 @@ namespace CommandLineParserFacts
         }
 
         [Fact]
-        public void nullOptionNameThrowsException()
+        public void nullNameThrowsException()
         {
             Assert.Throws<CommandLine.ConfigurationException>(
                 delegate
                 {
                     CommandLineBoolOption version = new CommandLineBoolOption(null);
-                });
-
-            /* null the Name after beeing constructed */
-            CommandLineBoolOption verbose = new CommandLineBoolOption("verbose");
-            Assert.Throws<CommandLine.ConfigurationException>(
-                delegate
-                {
-                    verbose.Name = null;
                 });
         }
 
@@ -38,14 +30,6 @@ namespace CommandLineParserFacts
                 {
                     CommandLineBoolOption version = new CommandLineBoolOption("");
                 });
-
-            /* empty the Name after beeing constructed */
-            CommandLineBoolOption verbose = new CommandLineBoolOption("verbose");
-            Assert.Throws<CommandLine.ConfigurationException>(
-                delegate
-                {
-                    verbose.Name = "";
-                });
         }
 
         [Fact]
@@ -56,14 +40,6 @@ namespace CommandLineParserFacts
                 {
                     CommandLineBoolOption version = new CommandLineBoolOption("version", "");
                 });
-
-            /* empty the ShortName after beeing constructed */
-            CommandLineBoolOption verbose = new CommandLineBoolOption("verbose");
-            Assert.Throws<CommandLine.ConfigurationException>(
-                delegate
-                {
-                    verbose.ShortName = "";
-                });
         }
 
         [Fact]
@@ -73,14 +49,6 @@ namespace CommandLineParserFacts
                 delegate
                 {
                     CommandLineBoolOption version = new CommandLineBoolOption("version", "version");
-                });
-
-            /* empty the Name after beeing constructed */
-            CommandLineBoolOption verbose = new CommandLineBoolOption("verbose", "v");
-            Assert.Throws<CommandLine.ConfigurationException>(
-                delegate
-                {
-                    verbose.ShortName = "version";
                 });
         }
 
@@ -118,14 +86,16 @@ namespace CommandLineParserFacts
                 });
         }
 
-        //TODO Resolve: Null ExpectedValue should print some default "value", but leads to NullReferenceException during PrintHelp().
         [Fact]
-        public void nullExpectedValueFact()
+        public void delegateFact()
         {
-            CommandLineBoolOption verbose = new CommandLineBoolOption("verbose");
-            verbose.ExpectedValue = null;
-            parser.AddOption(verbose);
-            parser.PrintHelp();
+            int portNumber = -1;
+            CommandLineIntOption portOption = new CommandLineIntOption("port", "p");
+            portOption.Delegate = arg => portNumber = arg.Value;
+            parser.AddOption(portOption);
+
+            parser.Parse(new string[] {"-p8080"});
+            Assert.Equal(8080, portNumber);
         }
 
     }

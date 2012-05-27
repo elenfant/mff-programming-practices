@@ -26,3 +26,12 @@ zadani neexistujici (kratke) volby shodi cely program vyjimkou
  v dokumentaci chybi udaje o vyhazovanych vyjimkach a z jakeho duvodu jsou tyto vyhazovany
 
  chybi udaje o defaultnim nastaveni (Option.Required, Option.ParameterType)
+
+ nikde neni zdokumentovano chovani ParameterType.optional spolu s nasledujicim arumentem ve tvaru separator nebo dalsi option..
+ skutecnost: sezere je jako parametr
+
+ chovani nikde neni moc specifikovano, testy jsou spise proti kodu a proti ocekavanemu (nikoliv specifikvoanemu) chovani
+
+ popsat chyby, viz neprosle testy...
+
+ DODELAT KOMENTARE K TESTUM... aneb jak radi DPP, psat je rovnou, ze... >-|

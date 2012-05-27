@@ -15,22 +15,43 @@ namespace CommandLineParserFacts
         }
 
         [Fact]
-        public void boolOptionParameterTypeRequiredFact()
+        public void presentValueAlwaysNull()
+        {
+            CommandLineBoolOption verbose = new CommandLineBoolOption("verbose");
+            parser.AddOption(verbose);
+
+            parser.Parse(new string[] { "--verbose" });
+
+            Assert.Null(verbose.Value);
+        }
+
+        [Fact]
+        public void notPresentValueAlwaysNull()
+        {
+            CommandLineBoolOption verbose = new CommandLineBoolOption("verbose");
+            parser.AddOption(verbose);
+
+            parser.Parse(new string[] { });
+
+            Assert.Null(verbose.Value);
+        }
+
+        [Fact]
+        public void parameterTypeRequiredFact()
         {
             CommandLineBoolOption verbose = new CommandLineBoolOption("verbose");
             verbose.ParameterType = ParameterType.Required;
             parser.AddOption(verbose);
             
             Assert.Throws<ParsingException>(
-                delegate {
-                    List<string> arguments = parser.Parse(new string[] { "--verbose=true"});
+                delegate
+                {
+                    parser.Parse(new string[] { "--verbose=true"});
                 });
-            Assert.True(verbose.Present);
-            Assert.Null(verbose.Value);
         }
 
         [Fact]
-        public void boolOptionParameterTypeOptionalFact()
+        public void parameterTypeOptionalFact()
         {
             CommandLineBoolOption verbose = new CommandLineBoolOption("verbose");
             verbose.ParameterType = ParameterType.Optional;
@@ -39,10 +60,8 @@ namespace CommandLineParserFacts
             Assert.Throws<ParsingException>(
                 delegate
                 {
-                    List<string> arguments = parser.Parse(new string[] { "--verbose=true" });
+                    parser.Parse(new string[] { "--verbose", "true" });
                 });
-            Assert.True(verbose.Present);
-            Assert.Null(verbose.Value);
         }
        
     }

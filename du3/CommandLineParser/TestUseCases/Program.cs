@@ -26,7 +26,7 @@ namespace TestUseCases
             output.Help = "Do not send the results to stderr, but overwrite the specified file.";
             output.ExpectedValue = "file";
             output.Required = true;
-            parser.AddOption(output);
+            //parser.AddOption(output);
 
             var append = new CommandLineBoolOption("append", "a");
             append.Help = "(Used together with -o.) Do not overwrite but append.";
@@ -36,7 +36,7 @@ namespace TestUseCases
             verbose.Help = "Give very verbose output about all the program knows about.";
             verbose.Required = true;
             //verbose.ParameterType = ParameterType.Required;
-            parser.AddOption(verbose);
+            //parser.AddOption(verbose);
 
             var help = new CommandLineBoolOption("help");
             help.Help = "Print a usage message on standard output and exit successfully.";
@@ -77,7 +77,7 @@ namespace TestUseCases
     {
         static void Main(string[] args)
         {
-            Time timeUseCase = new Time(new string[] {"-o", "path_to_file"});
+            Time timeUseCase = new Time(new string[] { "--format", null });
         }
     }
 }
