@@ -16,7 +16,8 @@ namespace TestUseCases
             var format = new CommandLineStringOption("format", "f");
             format.Help = "Specify output format, possibly overriding the format specified in the environment variable TIME.";
             format.ExpectedValue = "format";
-            //parser.AddOption(format);
+            parser.AddOption(format);
+            format.ShortName = "X";
 
             var portability = new CommandLineBoolOption("portability", "p");
             portability.Help = "Use the portable output format.";

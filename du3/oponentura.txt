@@ -1,37 +1,82 @@
-DU3: OPONENTURA DU2
+DU3: OPONENTURA DU2 (CommandLineParser)
 
-knihovna CommandLineParser
+Testy jsou psány v XUnit frameworku. Spustíte je příkazem:
+"xunit.console.clr4.exe CommandLineParserFacts.dll" (za předpokladu, že máte
+binárky xunit v PATH). Neprojdou 4 z 70 testů, konkrétně:
+CommandLineParserFacts.OptionFacts.sameOptionShortNameThrowsException
+CommandLineParserFacts.Parser.parseEmptyStringArgumentFact
+CommandLineParserFacts.Parser.nullExpectedValueFact
+CommandLineParserFacts.Parser.parseOneCharStringArgumentFact.
 
-CommandLineBoolOption nenastavuje Value member
+Splnění všech funkčních požadavků:
+Knihovna CommandLineParser implementuje řešení všech funkčních požadavků dle
+zadání du2. Výjimkou je chyba při zpracování argumentů kratších než dva znaky.
+Volby mohou být zadávány pouze jedním krátkým a jedním dlouhým jménem, přičemž
+dlouhé jméno je definováno povinně. Tento přístup mi přijde vyhovující
+(přestože naše řešení povolovalo větší počty synonym a nenutilo uživatele
+definovat povinně jeden z názvů). Z výpisu dokumentace voleb nelze zjistit,
+které jsou povinné, což je ale celkem drobnost.
 
-mo�nost zm�ny jmen po vytvo�en� objektu (nechal bych set private)
+Pohodlnost práce s rozhraním:
+Práce s knihovnou je snadná, přímočará až příjemná. Pojmenování metod
+i atributů přesně odpovídá jejich funkcím. Vzhledem k deklarativnímu přístupu
+definice a přidávání voleb může kód zabírat v main() trochu více místa,
+ale na druhou stranu si ho mohu vždy odsunout do vlastní procedury. Šikovné je
+použití typu dynamic pro uložení hodnot voleb a velice užitečná mi připadá
+i možnost přiřazení delegáta, který se zavolá po úspěšném zpracování volby.
 
+Implementace:
+Styl kódu je přehledný a vhodně členěný do jednotlivých metod. Většina výjimek
+je odchycena a řádně zpracována. Celkem závažnou chybou je nezpracování
+argumentů kratších dvou znaků, které navíc vede k nekonečné smyčce (viz
+řádek 55 souboru CommandLineParser.cs v metodě ParseInternal). Skoro mám pocit,
+že chybu tam museli zanést pro účely testování studentů učitelé. :-) Drobnou
+chybou pak je chybějící kontrola duplicitního krátkého jména volby. Mohu tak
+skončit u dvou voleb se stejným krátkým jménem, což zamezuje (tímto krátkým
+jménem) definovat na příkazové řádce jednu z nich. Zřejmě jde jen o zapomenutí,
+jelikož obdobná metoda na testování dlouhého jména je při přidávání zavolána.
+Celkem neprojdou čtyři testy.
 
-l�b� se mi pou�it� deleg�ta na postparse callback
+Návrh:
+Odůvodnění návrhu mi chybělo asi nejvíce (ale sám jsem si uvědomil, že naše
+řešení je v tomto asi slabší). Hlavní rozhodnutí jsou sice popsána a dokument
+je velice přehledný, ale přesto bych čekal více argumentace. Možná je to tím,
+že se mi některá rozhodnutí osobně nelíbí. Konkrétně to jsou:
+Většina atributů voleb by mohla být klidně readonly, jelikož to způsobilo obě
+chyby u dvou ze čtyř neprošlých testů. Uživatel knihovny si přeci může včas
+rozmyslet, které volby jak pojmenovat, které jsou povinné a jaké mají
+parametry. Všechny údaje pak lze poskytnout přímo konstruktoru a nechat je dále
+neměnné.
+Hierarchie tříd je přehledná a při zpracovávání argumentů se s nimi
+příjemně pracuje. Bohužel to má ale za následek, že i volba přepínač
+(CommandLineBoolOption) má atribut pro povinnost parametrů (ParameterType)
+a atribut pro povinnost volby (Required). Ani jeden z těchto atributů nemá
+pro přepínač smysl. Definovat povinný přepínač je zbytečné, když tím nezbývá
+možnost jiného rozhodnutí. Pouze tak nutí uživatele psát argument příkazové
+řádky navíc. Stejně tak možnost změnit povinnost parametru u přepínače nedává
+smysl. Obojí by šlo opět vyřešit alespoň rozumným konstruktorem a ponecháním
+těchto atributů readonly, nebo hierarchií s jednodušším základním typem, se
+kterou by se ale nejspíš hůře pracovalo.
 
-tisk helpu by m�l n�jak nazna�it, �e je option required
+Dokumentace:
+Dokumentace je přehledná, vše, co je v ní uvedeno, platí. Třídy, jejich
+atributy i metody jsou popsány dostatečně, i když by se hodilo jejich popis
+doplnit o defaultní hodnoty. Zcela chybí detailnější rozbor obecných principů,
+například chování ParameterType.Optional spolu s následujícím argumentem
+ve tvaru "--" nebo další volbou. Informace o vyhazovaných výjimkách je pouze
+na hlavní stránce dokumentace schovaná mezi příklady použití, ale chybí
+u jednotlivých metod. Vhodným doplněním dokumentace pak je text k návrhu,
+ve kterém jsou další informace, které ale patří právě spíš do dokumentace.
 
-u optionu bych nechal name a shortname private, proc bych je kdy chtel cist/menit?
+Testovatelnost:
+Zde mi chybí zejména přesnější specifikace nebo dokumentace chování, "proti
+níž" by šlo kód testovat. Šedé zóny zadání du2 tak zůstávají pro testování
+nejasné. Testy jsem tedy psal proti kódu a proti (*mnou*) očekávanému chování.
+To by šlo jistě zlepšit.
 
-zadani neexistujici (kratke) volby shodi cely program vyjimkou
-(null reference pointer, jelikoz ParsingExc nema nastavenu Option field, jelikoz je zpusobena nenalezenim optionu v seznamu)
-!!! tohle se tyka jen use casu, v normalnim pouziti zalezi na uzivateli, nicmene na Option field nelze spolehat, je ho treba testovat
- a pokud doslo napr k preklepu v optionu, pak nezjidtim v kterem!!!
-
- lze dovolit, aby booloption byl required, coz je nesmysl (pak uzivatel nema moznost volby, ale navic ke jmenu spustitelneho souboru musi vzdy povinen pridat dalsi povinne parametry)
- 
- nastaveni parametertype na required u booloptionu vede k exceptione, i kdyz "jakoby" parameter zadame
- proto by se melo toto nastaveni u booloptionu uplne zakazat, kontrolovat pristup k ParameterType
-
- v dokumentaci chybi udaje o vyhazovanych vyjimkach a z jakeho duvodu jsou tyto vyhazovany
-
- chybi udaje o defaultnim nastaveni (Option.Required, Option.ParameterType)
-
- nikde neni zdokumentovano chovani ParameterType.optional spolu s nasledujicim arumentem ve tvaru separator nebo dalsi option..
- skutecnost: sezere je jako parametr
-
- chovani nikde neni moc specifikovano, testy jsou spise proti kodu a proti ocekavanemu (nikoliv specifikvoanemu) chovani
-
- popsat chyby, viz neprosle testy...
-
- DODELAT KOMENTARE K TESTUM... aneb jak radi DPP, psat je rovnou, ze... >-|
+Celkově na mě knihovna působí dobře, její použití je intuitivní, rychle
+a snadno si na něj člověk zvykne. Tvůrci si s ní dali práci i dokumentace
+návrhu vypadá skvěle. Líbí se mi, jak knihovna neomezuje konečného uživatele
+při zadávání parametrů, které lze provést čtyřmi způsoby. Oproti našemu řešení
+ji chybí možnost obecného počtu synonym voleb a také další typy parametrů,
+které lze ale snadno dodat přidáním dalších potomků třídy CommandLineOption.

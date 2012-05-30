@@ -3,16 +3,18 @@ using CommandLine;
 
 namespace CommandLineParserFacts
 {
-
-    public class CommandLineOptionFacts
+    /// <summary>Class for testing usage of base abstract CommandLineOption class.</summary>
+    public class OptionFacts
     {
         CommandLineParser parser;
 
-        public CommandLineOptionFacts() {
+        public OptionFacts()
+        {
             this.parser = new CommandLineParser();
         }
 
-        [Fact]
+        /// <summary>Tests creating of option with null long name.</summary>
+        [Fact(Timeout = 5000)]
         public void nullNameThrowsException()
         {
             Assert.Throws<CommandLine.ConfigurationException>(
@@ -22,7 +24,8 @@ namespace CommandLineParserFacts
                 });
         }
 
-        [Fact]
+        /// <summary>Tests creating of option with empty long name.</summary>
+        [Fact(Timeout = 5000)]
         public void emptyOptionNameThrowsException()
         {
             Assert.Throws<CommandLine.ConfigurationException>(
@@ -32,7 +35,8 @@ namespace CommandLineParserFacts
                 });
         }
 
-        [Fact]
+        /// <summary>Tests creating of option with empty short name.</summary>
+        [Fact(Timeout = 5000)]
         public void emptyOptionShortNameThrowsException()
         {
             Assert.Throws<CommandLine.ConfigurationException>(
@@ -42,7 +46,8 @@ namespace CommandLineParserFacts
                 });
         }
 
-        [Fact]
+        /// <summary>Tests creating of option short name set to multicharacter string.</summary>
+        [Fact(Timeout = 5000)]
         public void multicharOptionShortNameThrowsException()
         {
             Assert.Throws<CommandLine.ConfigurationException>(
@@ -52,10 +57,11 @@ namespace CommandLineParserFacts
                 });
         }
 
-        [Fact]
+        /// <summary>Tests adding two options with same long name to the parser.</summary>
+        [Fact(Timeout = 5000)]
         public void sameOptionNameThrowsException()
         {
-            const string sameOptionName = "verbose";
+            string sameOptionName = "verbose";
             CommandLineBoolOption verbose = new CommandLineBoolOption(sameOptionName);
             parser.AddOption(verbose);
 
@@ -70,10 +76,11 @@ namespace CommandLineParserFacts
 
         //TODO Resolve: Two options with same ShortName should be banned.
         /* this should throw ConfigurationException, since we end up with two options with the same ShortName */
-        [Fact]
+        /// <summary>Tests adding two options with same short name to the parser.</summary>
+        [Fact(Timeout = 5000)]
         public void sameOptionShortNameThrowsException()
         {
-            const string sameOptionShortName = "v";
+            string sameOptionShortName = "v";
             CommandLineBoolOption verbose = new CommandLineBoolOption("verbose", sameOptionShortName);
             parser.AddOption(verbose);
 
@@ -86,7 +93,8 @@ namespace CommandLineParserFacts
                 });
         }
 
-        [Fact]
+        /// <summary>Tests adding delegate to option.</summary>
+        [Fact(Timeout = 5000)]
         public void delegateFact()
         {
             int portNumber = -1;

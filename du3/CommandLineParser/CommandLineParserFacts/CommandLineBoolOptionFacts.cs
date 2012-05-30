@@ -5,16 +5,18 @@ using CommandLine;
 
 namespace CommandLineParserFacts
 {
-    public class CommandLineBoolOptionFacts
+    /// <summary>Class for testing usage of CommandLineBoolOption class.</summary>
+    public class BoolOptionFacts
     {
         private CommandLineParser parser;
 
-        public CommandLineBoolOptionFacts()
+        public BoolOptionFacts()
         {
             this.parser = new CommandLineParser();
         }
 
-        [Fact]
+        /// <summary>Value of present boolean option is always null.</summary>
+        [Fact(Timeout = 5000)]
         public void presentValueAlwaysNull()
         {
             CommandLineBoolOption verbose = new CommandLineBoolOption("verbose");
@@ -25,7 +27,8 @@ namespace CommandLineParserFacts
             Assert.Null(verbose.Value);
         }
 
-        [Fact]
+        /// <summary>Value of missing option is always null.</summary>
+        [Fact(Timeout = 5000)]
         public void notPresentValueAlwaysNull()
         {
             CommandLineBoolOption verbose = new CommandLineBoolOption("verbose");
@@ -36,33 +39,49 @@ namespace CommandLineParserFacts
             Assert.Null(verbose.Value);
         }
 
-        [Fact]
-        public void parameterTypeRequiredFact()
+        /// <summary>Setting parameter type to required for boolean option is nonsense.</summary>
+        [Fact(Timeout = 5000)]
+        public void parameterTypeRequiredThrowsException()
         {
-            CommandLineBoolOption verbose = new CommandLineBoolOption("verbose");
+            CommandLineBoolOption verbose = new CommandLineBoolOption("verbose", "v");
             verbose.ParameterType = ParameterType.Required;
             parser.AddOption(verbose);
             
             Assert.Throws<ParsingException>(
                 delegate
                 {
-                    parser.Parse(new string[] { "--verbose=true"});
+                    parser.Parse(new string[] { "-v", "true"});
                 });
         }
 
-        [Fact]
-        public void parameterTypeOptionalFact()
+        /// <summary>Setting parameter type to optional for boolean option is nonsense.</summary>
+        [Fact(Timeout = 5000)]
+        public void parameterTypeOptionalThrowsException()
         {
-            CommandLineBoolOption verbose = new CommandLineBoolOption("verbose");
+            CommandLineBoolOption verbose = new CommandLineBoolOption("verbose", "v");
             verbose.ParameterType = ParameterType.Optional;
             parser.AddOption(verbose);
 
             Assert.Throws<ParsingException>(
                 delegate
                 {
-                    parser.Parse(new string[] { "--verbose", "true" });
+                    parser.Parse(new string[] { "-v", "true" });
                 });
         }
-       
+
+        /// <summary>Setting parameter value of boolean option is nonsense.</summary>
+        [Fact(Timeout = 5000)]
+        public void presentParameterThrowsException()
+        {
+            CommandLineBoolOption verbose = new CommandLineBoolOption("verbose");
+            parser.AddOption(verbose);
+
+            Assert.Throws<ParsingException>(
+                delegate
+                {
+                    parser.Parse(new string[] { "--verbose=true" });
+                });
+        }
+
     }
 }

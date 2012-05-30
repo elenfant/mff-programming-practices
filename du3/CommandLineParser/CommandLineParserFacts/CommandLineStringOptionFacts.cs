@@ -5,16 +5,18 @@ using CommandLine;
 
 namespace CommandLineParserFacts
 {
-    public class CommandLineStringOptionFacts
+    /// <summary>Class for testing usage of CommandLineStringOption class.</summary>
+    public class StringOptionFacts
     {
         private CommandLineParser parser;
 
-        public CommandLineStringOptionFacts()
+        public StringOptionFacts()
         {
             this.parser = new CommandLineParser();
         }
 
-        [Fact]
+        /// <summary>Tests remembering of allowed parameters.</summary>
+        [Fact(Timeout = 5000)]
         public void remembersAllowedValues()
         {
             CommandLineStringOption view = new CommandLineStringOption("view");
@@ -27,7 +29,8 @@ namespace CommandLineParserFacts
             Assert.Equal(expectedAllowedValues, view.AllowedValues, new CollectionEquivalenceComparer<string>());
         }
 
-        [Fact]
+        /// <summary>Basic test for parsing any parameter.</summary>
+        [Fact(Timeout = 5000)]
         public void allowedAnyFact()
         {
             CommandLineStringOption format = new CommandLineStringOption("format");
@@ -39,7 +42,8 @@ namespace CommandLineParserFacts
             Assert.Equal(expectedValue, format.Value);
         }
 
-        [Fact]
+        /// <summary>Basic test for parsing some allowed parameter.</summary>
+        [Fact(Timeout = 5000)]
         public void allowedSomeFact()
         {
             CommandLineStringOption view = new CommandLineStringOption("view");
@@ -53,7 +57,8 @@ namespace CommandLineParserFacts
             Assert.Equal("standard", view.Value);
         }
 
-        [Fact]
+        /// <summary>Tests for case sensitivity of allowed parameters.</summary>
+        [Fact(Timeout = 5000)]
         public void caseSensitiveThrowsException()
         {
             CommandLineStringOption view = new CommandLineStringOption("view");
@@ -67,7 +72,8 @@ namespace CommandLineParserFacts
                 });
         }
 
-        [Fact]
+        /// <summary>Tests of parsing not allowed parameters.</summary>
+        [Fact(Timeout = 5000)]
         public void notAllowedThrowsException()
         {
             CommandLineStringOption view = new CommandLineStringOption("view");
@@ -83,7 +89,8 @@ namespace CommandLineParserFacts
                 });
         }
 
-        [Fact]
+        /// <summary>Tests of parsing empty allowed parameter.</summary>
+        [Fact(Timeout = 5000)]
         public void emptyParameterAllowedFact()
         {
             CommandLineStringOption view = new CommandLineStringOption("view");
@@ -95,7 +102,8 @@ namespace CommandLineParserFacts
             Assert.Equal("", view.Value);
         }
 
-        [Fact]
+        /// <summary>Tests of parsing null allowed parameter.</summary>
+        [Fact(Timeout = 5000)]
         public void nullParameterAllowedFact()
         {
             CommandLineStringOption view = new CommandLineStringOption("view");
@@ -106,7 +114,8 @@ namespace CommandLineParserFacts
             Assert.Null(view.Value);
         }
 
-        [Fact]
+        /// <summary>Tests setting ParameterType to ParameterType.None.</summary>
+        [Fact(Timeout = 5000)]
         public void parameterTypeNoneFact()
         {
             CommandLineStringOption view = new CommandLineStringOption("view");
@@ -118,7 +127,8 @@ namespace CommandLineParserFacts
             Assert.Null(view.Value);
         }
 
-        [Fact]
+        /// <summary>Tests parsing of missing optional parameter.</summary>
+        [Fact(Timeout = 5000)]
         public void missingParameterTypeOptionalFact()
         {
             CommandLineStringOption view = new CommandLineStringOption("view");
@@ -130,7 +140,8 @@ namespace CommandLineParserFacts
             Assert.Null(view.Value);
         }
 
-        [Fact]
+        /// <summary>Tests parsing of present optional parameter.</summary>
+        [Fact(Timeout = 5000)]
         public void parameterTypeOptionalFact()
         {
             CommandLineStringOption view = new CommandLineStringOption("view");
